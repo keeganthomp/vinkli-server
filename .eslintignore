@@ -1,0 +1,7 @@
+./node_modules
+build
+drizzle/
+
+# graphql things to ignore
+./graphql/schema
+./types

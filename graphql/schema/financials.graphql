@@ -1,0 +1,114 @@
+#scalars
+scalar Date
+scalar JSON
+
+#######################
+# STRIPE PAYLOADS
+# https://stripe.com/docs/api
+#######################
+
+enum PayoutStatus {
+  paid
+  pending
+  in_transit
+  canceled
+  failed
+}
+
+enum SourceType {
+  card
+  bank_account
+  fpx
+}
+
+enum RefundStatus {
+  pending
+  requires_action
+  succeeded
+  failed
+  canceled
+}
+
+enum PaymentType {
+  ach_credit_transfer
+  ach_debit
+  acss_debit
+  alipay
+  au_becs_debit
+  bancontact
+  card
+  card_present
+  eps
+  giropay
+  ideal
+  klarna
+  multibanco
+  p24
+  sepa_debit
+  sofort
+  stripe_account
+  wechat
+}
+
+type Charge {
+  id: ID!
+  amount: Int!
+  createdAt: Date!
+  paid: Boolean!
+  paymentType: PaymentType
+  description: String
+}
+
+type Payout {
+  id: ID!
+  amount: Int!
+  createdAt: Date!
+  description: String
+  sourceType: SourceType!
+  status: PayoutStatus!
+  arrivalDate: Date!
+}
+
+type BalanceSourceTypes {
+  card: Int
+  fpx: Int
+  bank_account: Int
+}
+
+type BalanceObject {
+  amount: Int!
+  currency: String!
+  sourceTypes: BalanceSourceTypes
+}
+
+type Balance {
+  available: [BalanceObject!]!
+  reserved: [BalanceObject!]
+  instantAvailable: [BalanceObject!]
+  pending: [BalanceObject!]!
+}
+
+type Refund {
+  id: ID!
+  amount: Int!
+  chargeId: String!
+  createdAt: Date!
+  currency: String!
+  status: RefundStatus!
+}
+
+#######################
+# END STRIPE PAYLOADS
+#######################
+
+type ArtistFinancials {
+  charges: [Charge!]!
+  balance: Balance!
+  payouts: [Payout!]!
+  refunds: [Refund!]!
+}
+
+# queries
+type Query {
+  artistFinancials: ArtistFinancials!
+}

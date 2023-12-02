@@ -1,0 +1,58 @@
+type Query {
+  customerTattoos: [Tattoo!]!
+}
+
+type Mutation {
+  customerCreateTattoo(input: CustomerCreateTattooInput!): Tattoo!
+}
+
+type Tattoo {
+  id: ID!
+  createdAt: Date
+  updatedAt: Date
+  customerId: ID
+  title: String
+  description: String
+  tattooStyle: TattooStyle
+  tattooColor: TattooColor
+  imageUrls: [String!]!
+  artist: User
+  customer: User
+  consultation: Booking
+  sessions: [Booking!]
+}
+
+enum TattooStyle {
+  TRADITIONAL_AMERICAN
+  REALISM
+  TRIBAL
+  NEW_SCHOOL
+  JAPANESE_IREZUMI
+  BLACKWORK
+  DOTWORK
+  WATERCOLOR
+}
+
+enum TattooColor {
+  BLACK_AND_GREY
+  COLOR
+}
+
+input CustomerCreateTattooInput {
+  artistId: ID
+  title: String
+  description: String!
+  tattooStyle: TattooStyle
+  tattooColor: TattooColor
+  imagePaths: [String!]
+}
+
+input ArtistCreateTattooInput {
+  customerEmail: String!
+  date: Date
+  title: String
+  description: String!
+  tattooStyle: TattooStyle
+  tattooColor: TattooColor
+  imagePaths: [String!]
+}

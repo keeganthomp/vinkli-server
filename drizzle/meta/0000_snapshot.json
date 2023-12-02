@@ -1,0 +1,200 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "id": "1584f468-b029-4a72-9a65-69408513c116",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "booking": {
+      "name": "booking",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "uuid_generate_v4()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "artist_id": {
+          "name": "artist_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_id": {
+          "name": "customer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tattoo_style": {
+          "name": "tattoo_style",
+          "type": "tattooStyle",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tattoo_color": {
+          "name": "tattoo_color",
+          "type": "tattooColor",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remaining_sessions": {
+          "name": "remaining_sessions",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image_paths": {
+          "name": "image_paths",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "ARRAY[]::TEXT[]"
+        },
+        "status": {
+          "name": "status",
+          "type": "bookingStatus",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "user_type": {
+          "name": "user_type",
+          "type": "user_type",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'CUSTOMER'"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {
+    "bookingStatus": {
+      "name": "bookingStatus",
+      "values": {
+        "PENDING": "PENDING",
+        "CONFIRMED": "CONFIRMED",
+        "COMPLETED": "COMPLETED",
+        "CANCELLED": "CANCELLED"
+      }
+    },
+    "tattooColor": {
+      "name": "tattooColor",
+      "values": {
+        "BLACK_AND_GREY": "BLACK_AND_GREY",
+        "COLOR": "COLOR"
+      }
+    },
+    "tattooStyle": {
+      "name": "tattooStyle",
+      "values": {
+        "TRADITIONAL_AMERICAN": "TRADITIONAL_AMERICAN",
+        "REALISM": "REALISM",
+        "TRIBAL": "TRIBAL",
+        "NEW_SCHOOL": "NEW_SCHOOL",
+        "JAPANESE_IREZUMI": "JAPANESE_IREZUMI",
+        "BLACKWORK": "BLACKWORK",
+        "DOTWORK": "DOTWORK",
+        "WATERCOLOR": "WATERCOLOR"
+      }
+    },
+    "user_type": {
+      "name": "user_type",
+      "values": {
+        "ARTIST": "ARTIST",
+        "CUSTOMER": "CUSTOMER"
+      }
+    }
+  },
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}

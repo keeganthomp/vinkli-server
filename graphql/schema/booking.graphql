@@ -1,0 +1,76 @@
+type Query {
+  artistBookings(status: BookingStatus): [Booking!]!
+  customerBookings(status: BookingStatus): [Booking!]!
+  customerBooking(id: ID!): Booking!
+  artistBooking(id: ID!): Booking!
+}
+
+type Mutation {
+  customerCreateBooking(input: CustomerCreateBookingInput!): Booking!
+  artistCreateBooking(input: ArtistCreateBookingInput!): Booking!
+  artistUpdateBookingStatus(id: ID!, status: BookingStatus!): Booking!
+  updateBooking(id: ID!, input: UpdateBookingInput!): Booking!
+  deleteBooking(id: ID!): Booking
+}
+
+type Booking {
+  id: ID!
+  createdAt: Date
+  updatedAt: Date
+  artistId: ID
+  userId: ID!
+  tattooId: ID!
+  title: String
+  description: String
+  status: BookingStatus!
+  date: Date
+  type: BookingType!
+  artist: User
+  customer: User
+  tattoo: Tattoo
+}
+
+enum BookingType {
+  CONSULTATION
+  TATTOO_SESSION
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+input CustomerCreateBookingInput {
+  artistId: ID
+  date: Date
+  title: String
+  description: String
+}
+
+input TattooForBookingInput {
+  date: Date
+  title: String
+  description: String
+  tattooStyle: TattooStyle
+  tattooColor: TattooColor
+  imagePaths: [String!]
+}
+
+input ArtistCreateBookingInput {
+  customerEmail: String!
+  date: Date!
+  tattooId: ID
+  tattoo: TattooForBookingInput
+  title: String
+}
+
+input UpdateBookingInput {
+  artistId: ID
+  userId: ID
+  date: Date
+  title: String
+  description: String
+}

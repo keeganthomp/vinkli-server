@@ -1,0 +1,55 @@
+#scalars
+scalar Date
+
+enum UserType {
+  ARTIST
+  CUSTOMER
+}
+
+# types
+type User {
+  id: ID!
+  createdAt: Date!
+  updatedAt: Date!
+  email: String!
+  firstName: String
+  lastName: String
+  userType: UserType
+  stripeAccountId: String
+  stripeCustomerId: String
+  hasOnboardedToStripe: Boolean # for artists stripe connect
+}
+
+type ArtistPayment {
+  createdAt: Date!
+  updatedAt: Date!
+  artistId: ID
+  artist: User
+  customerId: ID!
+  customer: User!
+  amount: Int!
+  currency: String!
+  description: String
+  status: String!
+  stripeChargeId: String!
+  stripeTransferId: String!
+  stripeTransferReversalId: String
+  stripeRefundId: String
+  stripeRefundReversalId: String
+}
+
+type ArtistPaymentPayload {
+  payments: [ArtistPayment!]!
+  totalReceived: Int!
+}
+
+# queries
+type Query {
+  user: User!
+  users: [User]!
+  artistPayments: ArtistPaymentPayload!
+}
+# mutations
+type Mutation {
+  generateStripeConnectOnboardingLink: String!
+}

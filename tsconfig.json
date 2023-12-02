@@ -1,0 +1,24 @@
+{
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "*": ["./*"],
+      "@lib/*": ["./lib/*"],
+      "@graphql/*": ["./graphql/*"],
+      "@db/*": ["./db/*"]
+    },
+    "target": "ES2017",
+    "module": "ES2022",
+    "outDir": "./build",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "declaration": true
+  },
+  "include": ["./"],
+  "exclude": ["node_modules", "build", "tsconfig.json"]
+}
