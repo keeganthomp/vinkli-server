@@ -18,6 +18,21 @@ type User {
   stripeAccountId: String
   stripeCustomerId: String
   hasOnboardedToStripe: Boolean # for artists stripe connect
+  hourlyRate: Int
+  consultationFee: Int
+}
+
+type Artist {
+  id: ID!
+  createdAt: Date!
+  updatedAt: Date!
+  email: String!
+  firstName: String
+  lastName: String
+  stripeAccountId: String
+  hasOnboardedToStripe: Boolean
+  hourlyRate: Int
+  consultationFee: Int
 }
 
 type ArtistPayment {
@@ -46,10 +61,11 @@ type ArtistPaymentPayload {
 # queries
 type Query {
   user: User!
+  artist: Artist!
   users: [User]!
-  artistPayments: ArtistPaymentPayload!
 }
 # mutations
 type Mutation {
   generateStripeConnectOnboardingLink: String!
+  updateArtistRates(hourlyRate: Int, consultationFee: Int): Artist!
 }

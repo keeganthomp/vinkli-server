@@ -19,6 +19,20 @@ export type Scalars = {
   JSON: { input: any; output: any; }
 };
 
+export type Artist = {
+  __typename?: 'Artist';
+  consultationFee?: Maybe<Scalars['Int']['output']>;
+  createdAt: Scalars['Date']['output'];
+  email: Scalars['String']['output'];
+  firstName?: Maybe<Scalars['String']['output']>;
+  hasOnboardedToStripe?: Maybe<Scalars['Boolean']['output']>;
+  hourlyRate?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  lastName?: Maybe<Scalars['String']['output']>;
+  stripeAccountId?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['Date']['output'];
+};
+
 export type ArtistCreateBookingInput = {
   customerEmail: Scalars['String']['input'];
   date: Scalars['Date']['input'];
@@ -155,6 +169,7 @@ export type Mutation = {
   customerCreateTattoo: Tattoo;
   deleteBooking?: Maybe<Booking>;
   generateStripeConnectOnboardingLink: Scalars['String']['output'];
+  updateArtistRates: Artist;
   updateBooking: Booking;
 };
 
@@ -182,6 +197,12 @@ export type MutationCustomerCreateTattooArgs = {
 
 export type MutationDeleteBookingArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationUpdateArtistRatesArgs = {
+  consultationFee?: InputMaybe<Scalars['Int']['input']>;
+  hourlyRate?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -230,10 +251,10 @@ export type PayoutStatus =
 
 export type Query = {
   __typename?: 'Query';
+  artist: Artist;
   artistBooking: Booking;
   artistBookings: Array<Booking>;
   artistFinancials: ArtistFinancials;
-  artistPayments: ArtistPaymentPayload;
   customerBooking: Booking;
   customerBookings: Array<Booking>;
   customerTattoos: Array<Tattoo>;
@@ -334,10 +355,12 @@ export type UpdateBookingInput = {
 
 export type User = {
   __typename?: 'User';
+  consultationFee?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['Date']['output'];
   email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
   hasOnboardedToStripe?: Maybe<Scalars['Boolean']['output']>;
+  hourlyRate?: Maybe<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
   lastName?: Maybe<Scalars['String']['output']>;
   stripeAccountId?: Maybe<Scalars['String']['output']>;
@@ -422,6 +445,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  Artist: ResolverTypeWrapper<Artist>;
   ArtistCreateBookingInput: ArtistCreateBookingInput;
   ArtistCreateTattooInput: ArtistCreateTattooInput;
   ArtistFinancials: ResolverTypeWrapper<ArtistFinancials>;
@@ -461,6 +485,7 @@ export type ResolversTypes = ResolversObject<{
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  Artist: Artist;
   ArtistCreateBookingInput: ArtistCreateBookingInput;
   ArtistCreateTattooInput: ArtistCreateTattooInput;
   ArtistFinancials: ArtistFinancials;
@@ -487,6 +512,20 @@ export type ResolversParentTypes = ResolversObject<{
   TattooForBookingInput: TattooForBookingInput;
   UpdateBookingInput: UpdateBookingInput;
   User: User;
+}>;
+
+export type ArtistResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Artist'] = ResolversParentTypes['Artist']> = ResolversObject<{
+  consultationFee?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hasOnboardedToStripe?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  hourlyRate?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  stripeAccountId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ArtistFinancialsResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['ArtistFinancials'] = ResolversParentTypes['ArtistFinancials']> = ResolversObject<{
@@ -587,6 +626,7 @@ export type MutationResolvers<ContextType = ContextT, ParentType extends Resolve
   customerCreateTattoo?: Resolver<ResolversTypes['Tattoo'], ParentType, ContextType, RequireFields<MutationCustomerCreateTattooArgs, 'input'>>;
   deleteBooking?: Resolver<Maybe<ResolversTypes['Booking']>, ParentType, ContextType, RequireFields<MutationDeleteBookingArgs, 'id'>>;
   generateStripeConnectOnboardingLink?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updateArtistRates?: Resolver<ResolversTypes['Artist'], ParentType, ContextType, Partial<MutationUpdateArtistRatesArgs>>;
   updateBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<MutationUpdateBookingArgs, 'id' | 'input'>>;
 }>;
 
@@ -602,10 +642,10 @@ export type PayoutResolvers<ContextType = ContextT, ParentType extends Resolvers
 }>;
 
 export type QueryResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  artist?: Resolver<ResolversTypes['Artist'], ParentType, ContextType>;
   artistBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<QueryArtistBookingArgs, 'id'>>;
   artistBookings?: Resolver<Array<ResolversTypes['Booking']>, ParentType, ContextType, Partial<QueryArtistBookingsArgs>>;
   artistFinancials?: Resolver<ResolversTypes['ArtistFinancials'], ParentType, ContextType>;
-  artistPayments?: Resolver<ResolversTypes['ArtistPaymentPayload'], ParentType, ContextType>;
   customerBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<QueryCustomerBookingArgs, 'id'>>;
   customerBookings?: Resolver<Array<ResolversTypes['Booking']>, ParentType, ContextType, Partial<QueryCustomerBookingsArgs>>;
   customerTattoos?: Resolver<Array<ResolversTypes['Tattoo']>, ParentType, ContextType>;
@@ -642,10 +682,12 @@ export type TattooResolvers<ContextType = ContextT, ParentType extends Resolvers
 }>;
 
 export type UserResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = ResolversObject<{
+  consultationFee?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hasOnboardedToStripe?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  hourlyRate?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stripeAccountId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -656,6 +698,7 @@ export type UserResolvers<ContextType = ContextT, ParentType extends ResolversPa
 }>;
 
 export type Resolvers<ContextType = ContextT> = ResolversObject<{
+  Artist?: ArtistResolvers<ContextType>;
   ArtistFinancials?: ArtistFinancialsResolvers<ContextType>;
   ArtistPayment?: ArtistPaymentResolvers<ContextType>;
   ArtistPaymentPayload?: ArtistPaymentPayloadResolvers<ContextType>;
