@@ -4,7 +4,7 @@ dotenv.config();
 import { createClient } from '@supabase/supabase-js';
 
 const databaseUrl = process.env.DATABASE_URL as string;
-const serverKey = process.env.SERVICE_KEY as string;
+const serverKey = process.env.SUPABASE_SERVICE_KEY as string;
 
 // server client
 export const supabase = createClient(databaseUrl, serverKey);

@@ -19,7 +19,7 @@ import { ApolloServerErrorCode } from '@apollo/server/errors';
 import scalars from '@graphql/scalars';
 import logger from './logger';
 import resolvers from '@graphql/resolvers';
-import authenticate from 'auth';
+import authenticate from '@auth';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -30,12 +30,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const getFileExtension = () => (isProduction ? '.js' : '.ts');
 
 // webhooks directory
-const webhooksDir = path.join(__dirname, 'webhooks');
+const webhooksDir = path.join(__dirname, 'webhook');
 
 const PORT = 4000;
 const app = express();
 const webhookRouter = express.Router();
-webhookRouter.use(bp.json());
 
 // Our httpServer handles incoming requests to our Express app.
 // Below, we tell Apollo Server to "drain" this httpServer,

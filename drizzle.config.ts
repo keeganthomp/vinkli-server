@@ -3,15 +3,15 @@ dotenv.config();
 
 import type { Config } from 'drizzle-kit';
 
-const connectionString = process.env.CONNECTION_STRING as string;
+const connectionString = process.env.DATABASE_CONNECTION_STRING as string;
 
 if (!connectionString) {
-  throw new Error('CONNECTION_STRING is missing');
+  throw new Error('DATABASE_CONNECTION_STRING is missing');
 }
 
 export default {
   schema: './db/schema/*',
-  out: './drizzle',
+  out: 'db/drizzle',
   driver: 'pg',
   dbCredentials: {
     connectionString,

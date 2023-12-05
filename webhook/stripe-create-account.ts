@@ -5,6 +5,7 @@ import stripe from 'lib/stripe';
 import db from '@db/index';
 import { users as userSchema } from 'db/schema/user';
 import { eq } from 'drizzle-orm';
+import bp from 'body-parser';
 
 type UserFromHook = {
   id: string;
@@ -19,7 +20,7 @@ type UserFromHook = {
   stripe_customer_id: string | null;
 };
 
-router.post('/stripe-create-account', async (req, res) => {
+router.post('/stripe-create-account', bp.json(), async (req, res) => {
   try {
     const user = req?.body?.record as UserFromHook;
     if (!user) return res.status(400).send('No body found');

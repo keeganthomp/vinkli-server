@@ -8,7 +8,8 @@
       "*": ["./*"],
       "@lib/*": ["./lib/*"],
       "@graphql/*": ["./graphql/*"],
-      "@db/*": ["./db/*"]
+      "@db/*": ["./db/*"],
+      "@auth": ["./auth"],
     },
     "target": "ES2017",
     "module": "ES2022",

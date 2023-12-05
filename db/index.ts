@@ -10,10 +10,10 @@ import * as bookingSchema from './schema/booking';
 import * as tattooSchema from './schema/tattoo';
 import * as stripeCustomerSchema from './schema/stripeCustomer';
 
-const connectionString = process.env.CONNECTION_STRING as string;
+const connectionString = process.env.DATABASE_CONNECTION_STRING as string;
 
 if (!connectionString) {
-  throw new Error('CONNECTION_STRING is missing');
+  throw new Error('DATABASE_CONNECTION_STRING is missing');
 }
 
 // merge all schemas for drizzle

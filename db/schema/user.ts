@@ -5,6 +5,7 @@ import {
   timestamp,
   pgEnum,
   integer,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -30,4 +31,5 @@ export const users = pgTable('users', {
   lastName: text('last_name').notNull(),
   stripeAccountId: text('stripe_account_id'),
   stripeCustomerId: text('stripe_customer_id'),
+  hasOnboardedToStripe: boolean('has_onboarded_to_stripe'),
 });

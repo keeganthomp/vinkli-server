@@ -1,16 +1,17 @@
 import { GraphQLError } from 'graphql';
 import { Resolvers } from 'types/graphql';
 import stripe from 'lib/stripe';
-import db from '@db/index';
-import { users as userSchema } from 'db/schema/user';
-import { eq } from 'drizzle-orm';
+import { StripeProduct } from 'types/stripe';
 import {
-  DEFAULT_CURRENCY,
   MAX_STRIPE_PRODUCT_PRICE,
-  getStripeHourlyProductId,
-  getStripeConsultationProductId,
   getPriceInCents,
   getPriceInDollars,
+  createStripePrice,
+  createStripeProduct,
+  updateProductPrice,
+  deactivateProductPrice,
+  getArtistProducts,
+  getArtistPrices,
 } from 'utils/stripe';
 
 const resolvers: Resolvers = {
@@ -23,17 +24,7 @@ const resolvers: Resolvers = {
         return user;
       }
       // check if user/artist has onboarded via stripe connect
-      let hasOnboardedToStripe = false;
-      if (user.stripeAccountId) {
-        const { details_submitted } = await stripe.accounts.retrieve(
-          user.stripeAccountId,
-        );
-        hasOnboardedToStripe = details_submitted;
-      }
-      return {
-        ...user,
-        hasOnboardedToStripe,
-      };
+      return user;
     },
     artist: async (_, __, { user }) => {
       if (!user) {
@@ -43,7 +34,6 @@ const resolvers: Resolvers = {
         throw new GraphQLError('User is not an artist');
       }
       // check if user/artist has onboarded via stripe connect
-      let hasOnboardedToStripe = false;
       let hourlyRate = null;
       let consultationFee = null;
       // fetch stripe products, prices, and onboarding status
@@ -51,33 +41,19 @@ const resolvers: Resolvers = {
         const { details_submitted } = await stripe.accounts.retrieve(
           user.stripeAccountId,
         );
-        const tattooProductId = getStripeHourlyProductId(user);
-        const consultationProductId = getStripeConsultationProductId(user);
-        const { data: usersStripePrices } = await stripe.prices.list(
-          {
-            active: true,
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
-        const tattooPrice = usersStripePrices.find(
-          (price) => price.product === tattooProductId,
-        );
-        const consultationPrice = usersStripePrices.find(
-          (price) => price.product === consultationProductId,
-        );
-        if (tattooPrice) {
-          hourlyRate = getPriceInDollars(tattooPrice?.unit_amount);
+        const { hourlyRatePrice, consultationFeePrice } =
+          await getArtistPrices(user);
+        if (hourlyRatePrice) {
+          hourlyRate = getPriceInDollars(hourlyRatePrice?.unit_amount);
         }
-        if (consultationPrice) {
-          consultationFee = getPriceInDollars(consultationPrice?.unit_amount);
+        if (consultationFeePrice) {
+          consultationFee = getPriceInDollars(
+            consultationFeePrice?.unit_amount,
+          );
         }
-        hasOnboardedToStripe = details_submitted;
       }
       return {
         ...user,
-        hasOnboardedToStripe,
         hourlyRate,
         consultationFee,
       };
@@ -104,184 +80,110 @@ const resolvers: Resolvers = {
       // send onboarding link to client
       return accountLink.url;
     },
-    updateArtistRates: async (_, { hourlyRate, consultationFee }, { user }) => {
-      if (!user) {
+    updateArtistRates: async (
+      _,
+      { hourlyRate: newHourlyRate, consultationFee: newConsultationFee },
+      { user },
+    ) => {
+      const currentArtist = user;
+      if (!currentArtist) {
         throw new GraphQLError('User not authenticated');
       }
-      if (user.userType !== 'ARTIST') {
+      if (currentArtist.userType !== 'ARTIST') {
         throw new GraphQLError('User is not an artist');
       }
-      const existingArtist = await db.query.users.findFirst({
-        where: eq(userSchema.id, user.id),
-      });
-      if (!existingArtist) {
-        throw new GraphQLError('Artist not found');
-      }
-      if (!user.stripeAccountId) {
+      if (!currentArtist.stripeAccountId) {
         throw new GraphQLError('User does not have stripe account');
       }
-      const { data: usersStripeProducts } = await stripe.products.list(
-        {
-          active: true,
-        },
-        {
-          stripeAccount: user.stripeAccountId,
-        },
-      );
-      const { data: usersStripePrices } = await stripe.prices.list(
-        {
-          active: true,
-        },
-        {
-          stripeAccount: user.stripeAccountId,
-        },
-      );
-      const tattooProductId = getStripeHourlyProductId(user);
-      const consultationProductId = getStripeConsultationProductId(user);
-      let tattooProduct = usersStripeProducts.find(
-        (product) => product.id === tattooProductId,
-      );
-      let consultationProduct = usersStripeProducts.find(
-        (product) => product.id === consultationProductId,
-      );
-      const currentHourlyPrice = usersStripePrices.find(
-        (price) => price.product === tattooProductId,
-      );
-      const currentConsultationFeePrice = usersStripePrices.find(
-        (price) => price.product === consultationProductId,
-      );
-      const hourlyRateInCents = getPriceInCents(hourlyRate);
-      const consultationFeeInCents = getPriceInCents(consultationFee);
+      const newHourlyRateInCents = getPriceInCents(newHourlyRate);
+      const newConsultationFeeInCents = getPriceInCents(newConsultationFee);
       if (
-        hourlyRateInCents > MAX_STRIPE_PRODUCT_PRICE ||
-        consultationFeeInCents > MAX_STRIPE_PRODUCT_PRICE
+        newHourlyRateInCents > MAX_STRIPE_PRODUCT_PRICE ||
+        newConsultationFeeInCents > MAX_STRIPE_PRODUCT_PRICE
       ) {
         throw new GraphQLError('Rates must be less than $10,000');
       }
+      let { tattooProduct, consultationProduct } =
+        await getArtistProducts(currentArtist);
+      const {
+        hourlyRatePrice: currentHourlyPrice,
+        consultationFeePrice: currentConsultationFeePrice,
+      } = await getArtistPrices(currentArtist);
       // create stripe procucts if they don't exist
       if (!tattooProduct) {
-        tattooProduct = await stripe.products.create(
-          {
-            id: tattooProductId,
-            name: 'Tattoo Hourly Rate',
-            type: 'service',
-            metadata: {
-              userId: user.id,
-            },
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
+        tattooProduct = await createStripeProduct({
+          user: currentArtist,
+          type: StripeProduct.TATTOO_HOURLY,
+          name: 'Tattoo Hourly Rate',
+        });
       }
       if (!consultationProduct) {
-        consultationProduct = await stripe.products.create(
-          {
-            id: consultationProductId,
-            name: 'Consultation Fee',
-            type: 'service',
-            metadata: {
-              userId: user.id,
-            },
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
+        consultationProduct = await createStripeProduct({
+          user: currentArtist,
+          type: StripeProduct.CONSULTATION_FEE,
+          name: 'Consultation Fee',
+        });
       }
       // check if prices are the same
       const isSameHourlyPrice =
-        currentHourlyPrice?.unit_amount === hourlyRateInCents;
+        currentHourlyPrice?.unit_amount === newHourlyRateInCents;
       const isSameConsultationPrice =
-        currentConsultationFeePrice?.unit_amount === consultationFeeInCents;
-      const shouldUpdateHourlyPrice = hourlyRate && !isSameHourlyPrice;
+        currentConsultationFeePrice?.unit_amount === newConsultationFeeInCents;
+      // check if we need to update prices
+      const shouldUpdateHourlyPrice = newHourlyRate && !isSameHourlyPrice;
       const shouldUpdateConsultationPrice =
-        consultationFee && !isSameConsultationPrice;
+        newConsultationFee && !isSameConsultationPrice;
       // we need a new price object any time the price updates
       // regardless of whether or not their is already a price
       // this is a requirement of stripe
       // https://stripe.com/docs/products-prices/manage-prices#:~:text=Note%20that%20you%20can%20not,old%20price%20to%20be%20inactive.
       if (shouldUpdateHourlyPrice) {
         // create new price object for tattoo hourly rate
-        const newProductPrice = await stripe.prices.create(
-          {
-            unit_amount: hourlyRateInCents,
-            currency: DEFAULT_CURRENCY,
-            product: tattooProduct.id,
-            metadata: {
-              userId: user.id,
-            },
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
+        const newProductPrice = await createStripePrice({
+          user: currentArtist,
+          productId: tattooProduct.id,
+          amount: newHourlyRateInCents,
+        });
         // update the default price for the product
-        await stripe.products.update(
-          tattooProduct.id,
-          {
-            default_price: newProductPrice.id,
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
+        await updateProductPrice({
+          user: currentArtist,
+          productId: tattooProduct.id,
+          priceId: newProductPrice.id,
+        });
         // de-active old price if it exists
         if (currentHourlyPrice) {
-          await stripe.prices.update(
-            currentHourlyPrice.id,
-            {
-              active: false,
-            },
-            {
-              stripeAccount: user.stripeAccountId,
-            },
-          );
+          await deactivateProductPrice({
+            user: currentArtist,
+            priceId: currentHourlyPrice.id,
+          });
         }
       }
       if (shouldUpdateConsultationPrice) {
         // create new price object for consultation fee
-        const newConsultationFeePrice = await stripe.prices.create(
-          {
-            unit_amount: consultationFeeInCents,
-            currency: DEFAULT_CURRENCY,
-            product: consultationProduct.id,
-            metadata: {
-              userId: user.id,
-            },
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
+        const newConsultationFeePrice = await createStripePrice({
+          user: currentArtist,
+          productId: consultationProduct.id,
+          amount: newConsultationFeeInCents,
+        });
         // update the default price for the product
-        await stripe.products.update(
-          consultationProduct.id,
-          {
-            default_price: newConsultationFeePrice.id,
-          },
-          {
-            stripeAccount: user.stripeAccountId,
-          },
-        );
+        await updateProductPrice({
+          user: currentArtist,
+          productId: consultationProduct.id,
+          priceId: newConsultationFeePrice.id,
+        });
         // de-active old price if it exists
         if (currentConsultationFeePrice) {
-          await stripe.prices.update(
-            currentConsultationFeePrice.id,
-            {
-              active: false,
-            },
-            {
-              stripeAccount: user.stripeAccountId,
-            },
-          );
+          await deactivateProductPrice({
+            user: currentArtist,
+            priceId: currentConsultationFeePrice.id,
+          });
         }
       }
       return {
-        ...existingArtist,
+        ...currentArtist,
         hasOnboardedToStripe: true,
-        hourlyRate,
-        consultationFee,
+        hourlyRate: newHourlyRate,
+        consultationFee: newConsultationFee,
       };
     },
   },
