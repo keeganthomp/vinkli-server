@@ -15,16 +15,17 @@ type Mutation {
 
 type Booking {
   id: ID!
-  createdAt: Date
-  updatedAt: Date
   artistId: ID
   userId: ID!
   tattooId: ID!
+  type: BookingType!
+  createdAt: Date
+  updatedAt: Date
+  status: BookingStatus!
+  startDate: Date
+  endDate: Date
   title: String
   description: String
-  status: BookingStatus!
-  date: Date
-  type: BookingType!
   artist: User
   customer: User
   tattoo: Tattoo
@@ -61,16 +62,20 @@ input TattooForBookingInput {
 
 input ArtistCreateBookingInput {
   customerEmail: String!
-  date: Date!
+  startDate: Date!
+  endDate: Date
   tattooId: ID
   tattoo: TattooForBookingInput
   title: String
+  type: BookingType
 }
 
 input UpdateBookingInput {
   artistId: ID
   userId: ID
-  date: Date
+  startDate: Date
+  endDate: Date
   title: String
   description: String
+  type: BookingType
 }

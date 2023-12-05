@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql';
-import { Resolvers } from 'types/graphql';
+import { BookingType, Resolvers } from 'types/graphql';
 import db from '@db/index';
 import { booking as bookingSchema } from 'db/schema/booking';
 import { tattoo as tattooSchema } from 'db/schema/tattoo';
@@ -140,7 +140,7 @@ const resolvers: Resolvers = {
       if (currentUser.userType !== 'ARTIST') {
         throw new GraphQLError('User is not an artist');
       }
-      const { customerEmail, date, tattoo: newTattooInput } = input;
+      const { customerEmail, tattoo: newTattooInput } = input;
       const customer = await db.query.users.findFirst({
         where: (user, { eq, and }) =>
           and(
@@ -169,7 +169,9 @@ const resolvers: Resolvers = {
               userId: customer.id,
               tattooId: input.tattooId as string,
               title: input.title,
-              date,
+              type: input.type as BookingType,
+              startDate: input.startDate,
+              endDate: input.endDate,
             })
             .returning();
           return {
@@ -209,7 +211,9 @@ const resolvers: Resolvers = {
             userId: customer.id,
             tattooId: newTattoo.id,
             title: input.title,
-            date,
+            type: input.type as BookingType,
+            startDate: input.startDate,
+            endDate: input.endDate,
           })
           .returning();
         return {

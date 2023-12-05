@@ -35,10 +35,12 @@ export type Artist = {
 
 export type ArtistCreateBookingInput = {
   customerEmail: Scalars['String']['input'];
-  date: Scalars['Date']['input'];
+  endDate?: InputMaybe<Scalars['Date']['input']>;
+  startDate: Scalars['Date']['input'];
   tattoo?: InputMaybe<TattooForBookingInput>;
   tattooId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<BookingType>;
 };
 
 export type ArtistCreateTattooInput = {
@@ -112,9 +114,10 @@ export type Booking = {
   artistId?: Maybe<Scalars['ID']['output']>;
   createdAt?: Maybe<Scalars['Date']['output']>;
   customer?: Maybe<User>;
-  date?: Maybe<Scalars['Date']['output']>;
   description?: Maybe<Scalars['String']['output']>;
+  endDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
+  startDate?: Maybe<Scalars['Date']['output']>;
   status: BookingStatus;
   tattoo?: Maybe<Tattoo>;
   tattooId: Scalars['ID']['output'];
@@ -347,9 +350,11 @@ export type TattooStyle =
 
 export type UpdateBookingInput = {
   artistId?: InputMaybe<Scalars['ID']['input']>;
-  date?: InputMaybe<Scalars['Date']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  endDate?: InputMaybe<Scalars['Date']['input']>;
+  startDate?: InputMaybe<Scalars['Date']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<BookingType>;
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -588,9 +593,10 @@ export type BookingResolvers<ContextType = ContextT, ParentType extends Resolver
   artistId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customer?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  date?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['BookingStatus'], ParentType, ContextType>;
   tattoo?: Resolver<Maybe<ResolversTypes['Tattoo']>, ParentType, ContextType>;
   tattooId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;

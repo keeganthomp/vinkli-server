@@ -38,7 +38,10 @@ export const booking = pgTable('booking', {
   status: bookingStatusEnum('status').default('PENDING').notNull(),
   title: text('title'),
   description: text('description'),
-  date: timestamp('date', {
+  startDate: timestamp('start_date', {
+    withTimezone: true,
+  }).notNull(),
+  endDate: timestamp('end_date', {
     withTimezone: true,
   }).notNull(),
 });
