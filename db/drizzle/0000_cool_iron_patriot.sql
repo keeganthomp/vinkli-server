@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS "booking" (
 	"status" "bookingStatus" DEFAULT 'PENDING' NOT NULL,
 	"title" text,
 	"description" text,
-	"date" timestamp with time zone NOT NULL
+	"start_date" timestamp with time zone NOT NULL,
+	"end_date" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "stripe_customers" (

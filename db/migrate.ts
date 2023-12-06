@@ -4,7 +4,7 @@ import db from '.';
 const migrateDB = async () => {
   try {
     console.log('migrating db..');
-    await migrate(db, { migrationsFolder: 'drizzle' });
+    await migrate(db, { migrationsFolder: 'db/drizzle' });
     console.log('db migrated!');
     process.exit(0);
   } catch (err) {

@@ -43,7 +43,7 @@ export const booking = pgTable('booking', {
   }).notNull(),
   endDate: timestamp('end_date', {
     withTimezone: true,
-  }).notNull(),
+  }),
 });
 
 export const bookingRelations = relations(booking, ({ one, many }) => ({

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "0f13c882-5c3d-4db6-a58d-80bcd8b1d434",
+  "id": "b4af937a-a6db-4723-a761-0e9f65ad9c2d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "booking": {
@@ -73,11 +73,17 @@
           "primaryKey": false,
           "notNull": false
         },
-        "date": {
-          "name": "date",
+        "start_date": {
+          "name": "start_date",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
