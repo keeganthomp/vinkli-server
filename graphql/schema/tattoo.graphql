@@ -13,13 +13,14 @@ type Tattoo {
   customerId: ID
   title: String
   description: String
-  tattooStyle: TattooStyle
-  tattooColor: TattooColor
+  style: TattooStyle
+  color: TattooColor
   imageUrls: [String!]!
   artist: User
   customer: User
   consultation: Booking
   sessions: [Booking!]
+  placement: String
 }
 
 enum TattooStyle {
@@ -42,9 +43,10 @@ input CustomerCreateTattooInput {
   artistId: ID
   title: String
   description: String!
-  tattooStyle: TattooStyle
-  tattooColor: TattooColor
+  style: TattooStyle
+  color: TattooColor
   imagePaths: [String!]
+  placement: String
 }
 
 input ArtistCreateTattooInput {
@@ -52,7 +54,8 @@ input ArtistCreateTattooInput {
   date: Date
   title: String
   description: String!
-  tattooStyle: TattooStyle
-  tattooColor: TattooColor
+  style: TattooStyle
+  color: TattooColor
   imagePaths: [String!]
+  placement: String
 }

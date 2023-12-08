@@ -1,15 +1,18 @@
 type Query {
   artistBookings(status: BookingStatus): [Booking!]!
+  artistBooking(id: ID!): Booking!
   customerBookings(status: BookingStatus): [Booking!]!
   customerBooking(id: ID!): Booking!
-  artistBooking(id: ID!): Booking!
 }
 
 type Mutation {
   customerCreateBooking(input: CustomerCreateBookingInput!): Booking!
   artistCreateBooking(input: ArtistCreateBookingInput!): Booking!
-  artistUpdateBookingStatus(id: ID!, status: BookingStatus!): Booking!
-  updateBooking(id: ID!, input: UpdateBookingInput!): Booking!
+  artistUpdateBookingStatus(
+    id: ID!
+    status: BookingStatus!
+    duration: Int
+  ): Booking!
   deleteBooking(id: ID!): Booking
 }
 
@@ -24,11 +27,12 @@ type Booking {
   status: BookingStatus!
   startDate: Date
   endDate: Date
-  title: String
-  description: String
   artist: User
   customer: User
   tattoo: Tattoo
+  completedAt: Date
+  duration: Float
+  cost: Int
 }
 
 enum BookingType {
@@ -55,9 +59,10 @@ input TattooForBookingInput {
   date: Date
   title: String
   description: String
-  tattooStyle: TattooStyle
-  tattooColor: TattooColor
+  style: TattooStyle
+  color: TattooColor
   imagePaths: [String!]
+  placement: String
 }
 
 input ArtistCreateBookingInput {
@@ -67,15 +72,5 @@ input ArtistCreateBookingInput {
   tattooId: ID
   tattoo: TattooForBookingInput
   title: String
-  type: BookingType
-}
-
-input UpdateBookingInput {
-  artistId: ID
-  userId: ID
-  startDate: Date
-  endDate: Date
-  title: String
-  description: String
   type: BookingType
 }

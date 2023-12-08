@@ -66,9 +66,7 @@ router.post(
             })
             .where(eq(userSchema.stripeAccountId, connectedAccount.id))
             .returning();
-          console.log(
-            `${updatedUser.firstName} ${updatedUser.lastName} has completed onboarding!`,
-          );
+          console.log(`${updatedUser.name} has completed onboarding!`);
           return res
             .status(200)
             .send(

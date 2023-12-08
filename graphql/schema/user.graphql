@@ -12,8 +12,7 @@ type User {
   createdAt: Date!
   updatedAt: Date!
   email: String!
-  firstName: String
-  lastName: String
+  name: String
   userType: UserType
   stripeAccountId: String
   stripeCustomerId: String
@@ -27,8 +26,7 @@ type Artist {
   createdAt: Date!
   updatedAt: Date!
   email: String!
-  firstName: String
-  lastName: String
+  name: String
   stripeAccountId: String
   hasOnboardedToStripe: Boolean
   hourlyRate: Int

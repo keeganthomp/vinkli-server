@@ -26,10 +26,9 @@ export const users = pgTable('users', {
     .notNull(),
   userType: userTypeEnum('user_type').default('CUSTOMER').notNull(),
   email: text('email').notNull(),
+  name: text('name').notNull(),
   phoneNumber: integer('phone_number'),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
   stripeAccountId: text('stripe_account_id'),
   stripeCustomerId: text('stripe_customer_id'),
-  hasOnboardedToStripe: boolean('has_onboarded_to_stripe'),
+  hasOnboardedToStripe: boolean('has_onboarded_to_stripe').default(false),
 });

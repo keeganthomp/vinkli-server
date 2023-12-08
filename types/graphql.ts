@@ -24,11 +24,10 @@ export type Artist = {
   consultationFee?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['Date']['output'];
   email: Scalars['String']['output'];
-  firstName?: Maybe<Scalars['String']['output']>;
   hasOnboardedToStripe?: Maybe<Scalars['Boolean']['output']>;
   hourlyRate?: Maybe<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
-  lastName?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
   stripeAccountId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
 };
@@ -44,12 +43,13 @@ export type ArtistCreateBookingInput = {
 };
 
 export type ArtistCreateTattooInput = {
+  color?: InputMaybe<TattooColor>;
   customerEmail: Scalars['String']['input'];
   date?: InputMaybe<Scalars['Date']['input']>;
   description: Scalars['String']['input'];
   imagePaths?: InputMaybe<Array<Scalars['String']['input']>>;
-  tattooColor?: InputMaybe<TattooColor>;
-  tattooStyle?: InputMaybe<TattooStyle>;
+  placement?: InputMaybe<Scalars['String']['input']>;
+  style?: InputMaybe<TattooStyle>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -112,16 +112,17 @@ export type Booking = {
   __typename?: 'Booking';
   artist?: Maybe<User>;
   artistId?: Maybe<Scalars['ID']['output']>;
+  completedAt?: Maybe<Scalars['Date']['output']>;
+  cost?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['Date']['output']>;
   customer?: Maybe<User>;
-  description?: Maybe<Scalars['String']['output']>;
+  duration?: Maybe<Scalars['Float']['output']>;
   endDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   startDate?: Maybe<Scalars['Date']['output']>;
   status: BookingStatus;
   tattoo?: Maybe<Tattoo>;
   tattooId: Scalars['ID']['output'];
-  title?: Maybe<Scalars['String']['output']>;
   type: BookingType;
   updatedAt?: Maybe<Scalars['Date']['output']>;
   userId: Scalars['ID']['output'];
@@ -157,10 +158,11 @@ export type CustomerCreateBookingInput = {
 
 export type CustomerCreateTattooInput = {
   artistId?: InputMaybe<Scalars['ID']['input']>;
+  color?: InputMaybe<TattooColor>;
   description: Scalars['String']['input'];
   imagePaths?: InputMaybe<Array<Scalars['String']['input']>>;
-  tattooColor?: InputMaybe<TattooColor>;
-  tattooStyle?: InputMaybe<TattooStyle>;
+  placement?: InputMaybe<Scalars['String']['input']>;
+  style?: InputMaybe<TattooStyle>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -173,7 +175,6 @@ export type Mutation = {
   deleteBooking?: Maybe<Booking>;
   generateStripeConnectOnboardingLink: Scalars['String']['output'];
   updateArtistRates: Artist;
-  updateBooking: Booking;
 };
 
 
@@ -183,6 +184,7 @@ export type MutationArtistCreateBookingArgs = {
 
 
 export type MutationArtistUpdateBookingStatusArgs = {
+  duration?: InputMaybe<Scalars['Int']['input']>;
   id: Scalars['ID']['input'];
   status: BookingStatus;
 };
@@ -206,12 +208,6 @@ export type MutationDeleteBookingArgs = {
 export type MutationUpdateArtistRatesArgs = {
   consultationFee?: InputMaybe<Scalars['Int']['input']>;
   hourlyRate?: InputMaybe<Scalars['Int']['input']>;
-};
-
-
-export type MutationUpdateBookingArgs = {
-  id: Scalars['ID']['input'];
-  input: UpdateBookingInput;
 };
 
 export type PaymentType =
@@ -261,6 +257,7 @@ export type Query = {
   customerBooking: Booking;
   customerBookings: Array<Booking>;
   customerTattoos: Array<Tattoo>;
+  getPaymentLink: Scalars['String']['output'];
   stripeTerminalConnectionToken: Scalars['String']['output'];
   user: User;
   users: Array<Maybe<User>>;
@@ -284,6 +281,11 @@ export type QueryCustomerBookingArgs = {
 
 export type QueryCustomerBookingsArgs = {
   status?: InputMaybe<BookingStatus>;
+};
+
+
+export type QueryGetPaymentLinkArgs = {
+  bookingId: Scalars['ID']['input'];
 };
 
 export type Refund = {
@@ -311,6 +313,7 @@ export type SourceType =
 export type Tattoo = {
   __typename?: 'Tattoo';
   artist?: Maybe<User>;
+  color?: Maybe<TattooColor>;
   consultation?: Maybe<Booking>;
   createdAt?: Maybe<Scalars['Date']['output']>;
   customer?: Maybe<User>;
@@ -318,9 +321,9 @@ export type Tattoo = {
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   imageUrls: Array<Scalars['String']['output']>;
+  placement?: Maybe<Scalars['String']['output']>;
   sessions?: Maybe<Array<Booking>>;
-  tattooColor?: Maybe<TattooColor>;
-  tattooStyle?: Maybe<TattooStyle>;
+  style?: Maybe<TattooStyle>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['Date']['output']>;
 };
@@ -330,11 +333,12 @@ export type TattooColor =
   | 'COLOR';
 
 export type TattooForBookingInput = {
+  color?: InputMaybe<TattooColor>;
   date?: InputMaybe<Scalars['Date']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
   imagePaths?: InputMaybe<Array<Scalars['String']['input']>>;
-  tattooColor?: InputMaybe<TattooColor>;
-  tattooStyle?: InputMaybe<TattooStyle>;
+  placement?: InputMaybe<Scalars['String']['input']>;
+  style?: InputMaybe<TattooStyle>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -348,26 +352,15 @@ export type TattooStyle =
   | 'TRIBAL'
   | 'WATERCOLOR';
 
-export type UpdateBookingInput = {
-  artistId?: InputMaybe<Scalars['ID']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
-  endDate?: InputMaybe<Scalars['Date']['input']>;
-  startDate?: InputMaybe<Scalars['Date']['input']>;
-  title?: InputMaybe<Scalars['String']['input']>;
-  type?: InputMaybe<BookingType>;
-  userId?: InputMaybe<Scalars['ID']['input']>;
-};
-
 export type User = {
   __typename?: 'User';
   consultationFee?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['Date']['output'];
   email: Scalars['String']['output'];
-  firstName?: Maybe<Scalars['String']['output']>;
   hasOnboardedToStripe?: Maybe<Scalars['Boolean']['output']>;
   hourlyRate?: Maybe<Scalars['Int']['output']>;
   id: Scalars['ID']['output'];
-  lastName?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
   stripeAccountId?: Maybe<Scalars['String']['output']>;
   stripeCustomerId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['Date']['output'];
@@ -467,6 +460,7 @@ export type ResolversTypes = ResolversObject<{
   CustomerCreateBookingInput: CustomerCreateBookingInput;
   CustomerCreateTattooInput: CustomerCreateTattooInput;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
@@ -483,7 +477,6 @@ export type ResolversTypes = ResolversObject<{
   TattooColor: TattooColor;
   TattooForBookingInput: TattooForBookingInput;
   TattooStyle: TattooStyle;
-  UpdateBookingInput: UpdateBookingInput;
   User: ResolverTypeWrapper<User>;
   UserType: UserType;
 }>;
@@ -505,6 +498,7 @@ export type ResolversParentTypes = ResolversObject<{
   CustomerCreateBookingInput: CustomerCreateBookingInput;
   CustomerCreateTattooInput: CustomerCreateTattooInput;
   Date: Scalars['Date']['output'];
+  Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
@@ -515,7 +509,6 @@ export type ResolversParentTypes = ResolversObject<{
   String: Scalars['String']['output'];
   Tattoo: Tattoo;
   TattooForBookingInput: TattooForBookingInput;
-  UpdateBookingInput: UpdateBookingInput;
   User: User;
 }>;
 
@@ -523,11 +516,10 @@ export type ArtistResolvers<ContextType = ContextT, ParentType extends Resolvers
   consultationFee?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hasOnboardedToStripe?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   hourlyRate?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stripeAccountId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -591,16 +583,17 @@ export type BalanceSourceTypesResolvers<ContextType = ContextT, ParentType exten
 export type BookingResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Booking'] = ResolversParentTypes['Booking']> = ResolversObject<{
   artist?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   artistId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  completedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  cost?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customer?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  duration?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['BookingStatus'], ParentType, ContextType>;
   tattoo?: Resolver<Maybe<ResolversTypes['Tattoo']>, ParentType, ContextType>;
   tattooId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['BookingType'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -633,7 +626,6 @@ export type MutationResolvers<ContextType = ContextT, ParentType extends Resolve
   deleteBooking?: Resolver<Maybe<ResolversTypes['Booking']>, ParentType, ContextType, RequireFields<MutationDeleteBookingArgs, 'id'>>;
   generateStripeConnectOnboardingLink?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updateArtistRates?: Resolver<ResolversTypes['Artist'], ParentType, ContextType, Partial<MutationUpdateArtistRatesArgs>>;
-  updateBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<MutationUpdateBookingArgs, 'id' | 'input'>>;
 }>;
 
 export type PayoutResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Payout'] = ResolversParentTypes['Payout']> = ResolversObject<{
@@ -655,6 +647,7 @@ export type QueryResolvers<ContextType = ContextT, ParentType extends ResolversP
   customerBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<QueryCustomerBookingArgs, 'id'>>;
   customerBookings?: Resolver<Array<ResolversTypes['Booking']>, ParentType, ContextType, Partial<QueryCustomerBookingsArgs>>;
   customerTattoos?: Resolver<Array<ResolversTypes['Tattoo']>, ParentType, ContextType>;
+  getPaymentLink?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPaymentLinkArgs, 'bookingId'>>;
   stripeTerminalConnectionToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   users?: Resolver<Array<Maybe<ResolversTypes['User']>>, ParentType, ContextType>;
@@ -672,6 +665,7 @@ export type RefundResolvers<ContextType = ContextT, ParentType extends Resolvers
 
 export type TattooResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Tattoo'] = ResolversParentTypes['Tattoo']> = ResolversObject<{
   artist?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  color?: Resolver<Maybe<ResolversTypes['TattooColor']>, ParentType, ContextType>;
   consultation?: Resolver<Maybe<ResolversTypes['Booking']>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customer?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
@@ -679,9 +673,9 @@ export type TattooResolvers<ContextType = ContextT, ParentType extends Resolvers
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   imageUrls?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  placement?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sessions?: Resolver<Maybe<Array<ResolversTypes['Booking']>>, ParentType, ContextType>;
-  tattooColor?: Resolver<Maybe<ResolversTypes['TattooColor']>, ParentType, ContextType>;
-  tattooStyle?: Resolver<Maybe<ResolversTypes['TattooStyle']>, ParentType, ContextType>;
+  style?: Resolver<Maybe<ResolversTypes['TattooStyle']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -691,11 +685,10 @@ export type UserResolvers<ContextType = ContextT, ParentType extends ResolversPa
   consultationFee?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  firstName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hasOnboardedToStripe?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   hourlyRate?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  lastName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stripeAccountId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   stripeCustomerId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;

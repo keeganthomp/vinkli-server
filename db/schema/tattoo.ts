@@ -1,4 +1,11 @@
-import { pgTable, text, uuid, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  uuid,
+  timestamp,
+  pgEnum,
+  integer,
+} from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 import { users } from './user';
 import { booking as appointment } from './booking';
@@ -38,8 +45,9 @@ export const tattoo = pgTable('tattoo', {
   userId: uuid('user_id').notNull(),
   title: text('title'),
   description: text('description'),
-  tattooStyle: tattooStyleEnum('tattoo_style'),
-  tattooColor: tattooColorEnum('tattoo_color'),
+  style: tattooStyleEnum('style'),
+  color: tattooColorEnum('color'),
+  placement: text('placement'),
   imagePaths: text('image_paths')
     .array()
     .notNull()

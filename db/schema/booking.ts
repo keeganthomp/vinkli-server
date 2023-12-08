@@ -36,12 +36,13 @@ export const booking = pgTable('booking', {
   tattooId: uuid('tattoo_id').notNull(),
   type: bookingTypeEnum('type').default('CONSULTATION').notNull(),
   status: bookingStatusEnum('status').default('PENDING').notNull(),
-  title: text('title'),
-  description: text('description'),
   startDate: timestamp('start_date', {
     withTimezone: true,
   }).notNull(),
   endDate: timestamp('end_date', {
+    withTimezone: true,
+  }),
+  completedAt: timestamp('completed_at', {
     withTimezone: true,
   }),
 });

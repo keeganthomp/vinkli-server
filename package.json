@@ -19,7 +19,7 @@
     "drizzle:push": "drizzle-kit push:pg",
     "drizzle:generate": "drizzle-kit generate:pg",
     "drizzle:migrate": "npx esno ./db/migrate.ts",
-    "drizzle:seed": "esno ./db/seed.ts",
+    "drizzle:seed": "esno ./db/seed/index.ts",
     "drizzle:studio": "drizzle-kit studio",
     "supabase:local:start": "npx supabase start",
     "supabase:local:stop": "npx supabase stop",

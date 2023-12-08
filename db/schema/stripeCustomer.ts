@@ -17,8 +17,8 @@ export const stripeCustomer = pgTable('stripe_customers', {
   })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  stripeCustomerId: text('stripe_customer_id').notNull(),
   artistId: text('artist_id').notNull(),
+  stripeCustomerId: text('stripe_customer_id').notNull(),
   userId: uuid('user_id').notNull(),
 });
 

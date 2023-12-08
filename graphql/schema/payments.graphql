@@ -1,4 +1,5 @@
 # queries
 type Query {
   stripeTerminalConnectionToken: String!
+  getPaymentLink(bookingId: ID!): String!
 }

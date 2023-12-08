@@ -181,7 +181,6 @@ const resolvers: Resolvers = {
       }
       return {
         ...currentArtist,
-        hasOnboardedToStripe: true,
         hourlyRate: newHourlyRate,
         consultationFee: newConsultationFee,
       };
