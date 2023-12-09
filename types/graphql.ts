@@ -113,16 +113,17 @@ export type Booking = {
   artist?: Maybe<User>;
   artistId?: Maybe<Scalars['ID']['output']>;
   completedAt?: Maybe<Scalars['Date']['output']>;
-  cost?: Maybe<Scalars['Int']['output']>;
   createdAt?: Maybe<Scalars['Date']['output']>;
   customer?: Maybe<User>;
   duration?: Maybe<Scalars['Float']['output']>;
   endDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
+  payment?: Maybe<Payment>;
   startDate?: Maybe<Scalars['Date']['output']>;
   status: BookingStatus;
   tattoo?: Maybe<Tattoo>;
   tattooId: Scalars['ID']['output'];
+  totalDue?: Maybe<Scalars['Int']['output']>;
   type: BookingType;
   updatedAt?: Maybe<Scalars['Date']['output']>;
   userId: Scalars['ID']['output'];
@@ -210,6 +211,22 @@ export type MutationUpdateArtistRatesArgs = {
   hourlyRate?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type Payment = {
+  __typename?: 'Payment';
+  amount: Scalars['Int']['output'];
+  booking: Booking;
+  bookingId: Scalars['ID']['output'];
+  chargeId: Scalars['String']['output'];
+  createdAt: Scalars['Date']['output'];
+  paymentIntentId?: Maybe<Scalars['String']['output']>;
+  status: PaymentStatus;
+};
+
+export type PaymentStatus =
+  | 'FAILED'
+  | 'PENDING'
+  | 'SUCCESS';
+
 export type PaymentType =
   | 'ach_credit_transfer'
   | 'ach_debit'
@@ -258,6 +275,7 @@ export type Query = {
   customerBookings: Array<Booking>;
   customerTattoos: Array<Tattoo>;
   getPaymentLink: Scalars['String']['output'];
+  getPayments: Array<Payment>;
   stripeTerminalConnectionToken: Scalars['String']['output'];
   user: User;
   users: Array<Maybe<User>>;
@@ -465,6 +483,8 @@ export type ResolversTypes = ResolversObject<{
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  Payment: ResolverTypeWrapper<Payment>;
+  PaymentStatus: PaymentStatus;
   PaymentType: PaymentType;
   Payout: ResolverTypeWrapper<Payout>;
   PayoutStatus: PayoutStatus;
@@ -503,6 +523,7 @@ export type ResolversParentTypes = ResolversObject<{
   Int: Scalars['Int']['output'];
   JSON: Scalars['JSON']['output'];
   Mutation: {};
+  Payment: Payment;
   Payout: Payout;
   Query: {};
   Refund: Refund;
@@ -584,16 +605,17 @@ export type BookingResolvers<ContextType = ContextT, ParentType extends Resolver
   artist?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   artistId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   completedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
-  cost?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   createdAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   customer?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   duration?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  payment?: Resolver<Maybe<ResolversTypes['Payment']>, ParentType, ContextType>;
   startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['BookingStatus'], ParentType, ContextType>;
   tattoo?: Resolver<Maybe<ResolversTypes['Tattoo']>, ParentType, ContextType>;
   tattooId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  totalDue?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['BookingType'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -628,6 +650,17 @@ export type MutationResolvers<ContextType = ContextT, ParentType extends Resolve
   updateArtistRates?: Resolver<ResolversTypes['Artist'], ParentType, ContextType, Partial<MutationUpdateArtistRatesArgs>>;
 }>;
 
+export type PaymentResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Payment'] = ResolversParentTypes['Payment']> = ResolversObject<{
+  amount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  booking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType>;
+  bookingId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  chargeId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
+  paymentIntentId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['PaymentStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type PayoutResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Payout'] = ResolversParentTypes['Payout']> = ResolversObject<{
   amount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   arrivalDate?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
@@ -648,6 +681,7 @@ export type QueryResolvers<ContextType = ContextT, ParentType extends ResolversP
   customerBookings?: Resolver<Array<ResolversTypes['Booking']>, ParentType, ContextType, Partial<QueryCustomerBookingsArgs>>;
   customerTattoos?: Resolver<Array<ResolversTypes['Tattoo']>, ParentType, ContextType>;
   getPaymentLink?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPaymentLinkArgs, 'bookingId'>>;
+  getPayments?: Resolver<Array<ResolversTypes['Payment']>, ParentType, ContextType>;
   stripeTerminalConnectionToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   users?: Resolver<Array<Maybe<ResolversTypes['User']>>, ParentType, ContextType>;
@@ -709,6 +743,7 @@ export type Resolvers<ContextType = ContextT> = ResolversObject<{
   Date?: GraphQLScalarType;
   JSON?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
+  Payment?: PaymentResolvers<ContextType>;
   Payout?: PayoutResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   Refund?: RefundResolvers<ContextType>;

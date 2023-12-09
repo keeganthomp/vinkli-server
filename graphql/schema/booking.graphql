@@ -32,7 +32,9 @@ type Booking {
   tattoo: Tattoo
   completedAt: Date
   duration: Float
-  cost: Int
+  totalDue: Int
+  paymentReceived: Boolean!
+  payment: Payment
 }
 
 enum BookingType {

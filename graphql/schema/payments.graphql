@@ -2,4 +2,21 @@
 type Query {
   stripeTerminalConnectionToken: String!
   getPaymentLink(bookingId: ID!): String!
+  getPayments: [Payment!]!
+}
+
+enum PaymentStatus {
+  SUCCESS
+  PENDING
+  FAILED
+}
+
+type Payment {
+  chargeId: String!
+  paymentIntentId: String
+  createdAt: Date!
+  amount: Int!
+  status: PaymentStatus!
+  bookingId: ID!
+  booking: Booking!
 }

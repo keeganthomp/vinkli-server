@@ -6,8 +6,7 @@ import { tattoo as tattooSchema } from 'db/schema/tattoo';
 import { generateImageUrls } from 'utils/image';
 import { StorageBucket } from 'types/storage';
 import { desc, eq } from 'drizzle-orm';
-import { getBookingDuration } from 'utils/booking';
-import { getArtistPrices } from 'utils/stripe';
+import { getBookingDuration, getAmountDue } from 'utils/booking';
 
 const resolvers: Resolvers = {
   Query: {
@@ -65,25 +64,11 @@ const resolvers: Resolvers = {
       if (booking.status !== 'COMPLETED') {
         return bookingPayload;
       }
-      const { hourlyRatePrice, consultationFeePrice } =
-        await getArtistPrices(user);
-      if (booking.type === 'TATTOO_SESSION') {
-        if (!hourlyRatePrice) {
-          throw new GraphQLError('Hourly rate price not found');
-        }
-        return {
-          ...bookingPayload,
-          cost: hourlyRatePrice.unit_amount,
-        };
-      } else {
-        if (!consultationFeePrice) {
-          throw new GraphQLError('Consultation fee price not found');
-        }
-        return {
-          ...bookingPayload,
-          cost: consultationFeePrice.unit_amount,
-        };
-      }
+      const totalDue = await getAmountDue(user, booking);
+      return {
+        ...bookingPayload,
+        totalDue,
+      };
     },
     artistBookings: async (_, __, { user }) => {
       if (user.userType !== 'ARTIST') {
@@ -262,7 +247,9 @@ const resolvers: Resolvers = {
       { user },
     ) => {
       if (user.userType !== 'ARTIST') {
-        throw new GraphQLError('User is not an artist');
+        throw new GraphQLError('User is not an artist', {
+          extensions: { code: 'FORBIDDEN' },
+        });
       }
       // check if booking exists
       const booking = await db.query.booking.findFirst({

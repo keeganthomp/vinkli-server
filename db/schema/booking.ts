@@ -1,4 +1,11 @@
-import { pgTable, text, uuid, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  uuid,
+  timestamp,
+  pgEnum,
+  boolean,
+} from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 import { users } from './user';
 import { tattoo } from './tattoo';
@@ -45,6 +52,9 @@ export const booking = pgTable('booking', {
   completedAt: timestamp('completed_at', {
     withTimezone: true,
   }),
+  paymentIntentId: text('payment_intent_id'),
+  paymentLinkId: text('payment_link_id'),
+  paymentReceived: boolean('payment_receive').default(false).notNull(),
 });
 
 export const bookingRelations = relations(booking, ({ one, many }) => ({
