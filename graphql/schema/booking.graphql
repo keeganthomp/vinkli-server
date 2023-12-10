@@ -1,5 +1,5 @@
 type Query {
-  artistBookings(status: BookingStatus): [Booking!]!
+  artistBookings(statuses: [BookingStatus]): [Booking!]!
   artistBooking(id: ID!): Booking!
   customerBookings(status: BookingStatus): [Booking!]!
   customerBooking(id: ID!): Booking!

@@ -119,6 +119,7 @@ export type Booking = {
   endDate?: Maybe<Scalars['Date']['output']>;
   id: Scalars['ID']['output'];
   payment?: Maybe<Payment>;
+  paymentReceived: Scalars['Boolean']['output'];
   startDate?: Maybe<Scalars['Date']['output']>;
   status: BookingStatus;
   tattoo?: Maybe<Tattoo>;
@@ -288,7 +289,7 @@ export type QueryArtistBookingArgs = {
 
 
 export type QueryArtistBookingsArgs = {
-  status?: InputMaybe<BookingStatus>;
+  statuses?: InputMaybe<Array<InputMaybe<BookingStatus>>>;
 };
 
 
@@ -611,6 +612,7 @@ export type BookingResolvers<ContextType = ContextT, ParentType extends Resolver
   endDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   payment?: Resolver<Maybe<ResolversTypes['Payment']>, ParentType, ContextType>;
+  paymentReceived?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   startDate?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['BookingStatus'], ParentType, ContextType>;
   tattoo?: Resolver<Maybe<ResolversTypes['Tattoo']>, ParentType, ContextType>;

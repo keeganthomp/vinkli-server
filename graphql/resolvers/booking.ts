@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql';
-import { BookingType, Resolvers } from 'types/graphql';
+import { BookingType, Resolvers, BookingStatus } from 'types/graphql';
 import db from '@db/index';
 import { booking as bookingSchema } from 'db/schema/booking';
 import { tattoo as tattooSchema } from 'db/schema/tattoo';
@@ -7,6 +7,13 @@ import { generateImageUrls } from 'utils/image';
 import { StorageBucket } from 'types/storage';
 import { desc, eq } from 'drizzle-orm';
 import { getBookingDuration, getAmountDue } from 'utils/booking';
+
+const allBookingStatuses: BookingStatus[] = [
+  'PENDING',
+  'CONFIRMED',
+  'COMPLETED',
+  'CANCELLED',
+];
 
 const resolvers: Resolvers = {
   Query: {
@@ -70,14 +77,22 @@ const resolvers: Resolvers = {
         totalDue,
       };
     },
-    artistBookings: async (_, __, { user }) => {
+    artistBookings: async (_, { statuses = allBookingStatuses }, { user }) => {
       if (user.userType !== 'ARTIST') {
         throw new GraphQLError('User is not an artist', {
           extensions: { code: 'FORBIDDEN' },
         });
       }
+      const statusFilter: BookingStatus[] =
+        !statuses || statuses.length === 0
+          ? allBookingStatuses
+          : (statuses as BookingStatus[]);
       const bookings = await db.query.booking.findMany({
-        where: (booking, { eq }) => eq(booking.artistId, user.id),
+        where: (booking, { eq, and, inArray }) =>
+          and(
+            eq(booking.artistId, user.id),
+            inArray(booking.status, statusFilter),
+          ),
         orderBy: [desc(bookingSchema.createdAt)],
         with: {
           customer: true,
@@ -171,9 +186,7 @@ const resolvers: Resolvers = {
           where: (tattoo, { eq }) => eq(tattoo.id, input.tattooId as string),
         });
         if (!tattoo) {
-          throw new GraphQLError(
-            'Please provide a valid tattoo id or new tattoo info',
-          );
+          throw new GraphQLError('Tattoo not found');
         }
         const newBooking = await db.transaction(async (tx) => {
           const [newBooking] = await tx
@@ -201,20 +214,16 @@ const resolvers: Resolvers = {
         return newBooking;
       }
       // create tattoo and associated booking for new tattoo
-      if (!newTattooInput) {
-        throw new GraphQLError(
-          'Please provide a valid tattoo id or new tattoo info',
-        );
-      }
       // we need all transactions to be atomic
       // meaning if one fails, all should fail
       const newBooking = await db.transaction(async (tx) => {
+        const newTattooPayload = newTattooInput || {};
         const [newTattoo] = await tx
           .insert(tattooSchema)
           .values({
-            ...newTattooInput,
+            ...newTattooPayload,
             userId: customer.id,
-            imagePaths: newTattooInput.imagePaths || [],
+            imagePaths: newTattooPayload?.imagePaths || [],
           })
           .returning();
         const [newBooking] = await tx
