@@ -152,10 +152,11 @@ export type Charge = {
 };
 
 export type CustomerCreateBookingInput = {
-  artistId?: InputMaybe<Scalars['ID']['input']>;
-  date?: InputMaybe<Scalars['Date']['input']>;
-  description?: InputMaybe<Scalars['String']['input']>;
+  artistId: Scalars['ID']['input'];
+  customerEmail: Scalars['String']['input'];
+  tattoo: TattooForBookingInput;
   title?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<BookingType>;
 };
 
 export type CustomerCreateTattooInput = {

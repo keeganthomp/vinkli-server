@@ -51,10 +51,11 @@ enum BookingStatus {
 }
 
 input CustomerCreateBookingInput {
-  artistId: ID
-  date: Date
+  artistId: ID!
+  tattoo: TattooForBookingInput!
+  customerEmail: String!
   title: String
-  description: String
+  type: BookingType
 }
 
 input TattooForBookingInput {

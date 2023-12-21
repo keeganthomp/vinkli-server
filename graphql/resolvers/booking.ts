@@ -3,10 +3,14 @@ import { BookingType, Resolvers, BookingStatus } from 'types/graphql';
 import db from '@db/index';
 import { booking as bookingSchema } from 'db/schema/booking';
 import { tattoo as tattooSchema } from 'db/schema/tattoo';
+import { users as usersShema } from 'db/schema/user';
 import { generateImageUrls } from 'utils/image';
 import { StorageBucket } from 'types/storage';
 import { desc, eq } from 'drizzle-orm';
 import { getBookingDuration, getAmountDue } from 'utils/booking';
+import { v4 as uuidv4 } from 'uuid';
+
+type NewBooking = typeof bookingSchema.$inferInsert;
 
 const allBookingStatuses: BookingStatus[] = [
   'PENDING',
@@ -93,7 +97,7 @@ const resolvers: Resolvers = {
             eq(booking.artistId, user.id),
             inArray(booking.status, statusFilter),
           ),
-        orderBy: [desc(bookingSchema.createdAt)],
+        orderBy: [desc(bookingSchema.startDate), desc(bookingSchema.updatedAt)],
         with: {
           customer: true,
           artist: true,
@@ -180,6 +184,14 @@ const resolvers: Resolvers = {
       if (!customer) {
         throw new GraphQLError('Customer not found');
       }
+      const newBookingPayload: Omit<NewBooking, 'tattooId'> = {
+        artistId: currentUser.id,
+        userId: customer.id,
+        type: input.type as BookingType,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        status: 'CONFIRMED',
+      };
       // create booking with existing tattoo
       if (input.tattooId) {
         const tattoo = await db.query.tattoo.findFirst({
@@ -192,12 +204,8 @@ const resolvers: Resolvers = {
           const [newBooking] = await tx
             .insert(bookingSchema)
             .values({
-              artistId: currentUser.id,
-              userId: customer.id,
+              ...newBookingPayload,
               tattooId: input.tattooId as string,
-              type: input.type as BookingType,
-              startDate: input.startDate,
-              endDate: input.endDate,
             })
             .returning();
           return {
@@ -229,12 +237,8 @@ const resolvers: Resolvers = {
         const [newBooking] = await tx
           .insert(bookingSchema)
           .values({
-            artistId: currentUser.id,
-            userId: customer.id,
+            ...newBookingPayload,
             tattooId: newTattoo.id,
-            type: input.type as BookingType,
-            startDate: input.startDate,
-            endDate: input.endDate,
           })
           .returning();
         return {
@@ -317,6 +321,57 @@ const resolvers: Resolvers = {
           ),
         },
       };
+    },
+    customerCreateBooking: async (_, { input }) => {
+      const artistForBooking = await db.query.users.findFirst({
+        where: (user, { eq, and }) =>
+          and(eq(user.id, input.artistId), eq(user.userType, 'ARTIST')),
+      });
+      if (!artistForBooking) {
+        throw new GraphQLError('Artist not found');
+      }
+      // check for customer
+      let customer = await db.query.users.findFirst({
+        where: (user, { eq, and }) =>
+          and(
+            eq(user.email, input.customerEmail.toLowerCase()),
+            eq(user.userType, 'CUSTOMER'),
+          ),
+      });
+      // if no customer, create new customer
+      const booking = await db.transaction(async (tx) => {
+        if (!customer) {
+          [customer] = await tx
+            .insert(usersShema)
+            .values({
+              email: input.customerEmail.toLowerCase(),
+              userType: 'CUSTOMER',
+              name: input.customerEmail.replace(/@.*/, ''), // use email as initial name for now
+              id: uuidv4(), // need to figure out how to link to supabase auth user id....probably just add to supabse auth and have a trigger to add to users table
+            })
+            .returning();
+        }
+        const [newTattoo] = await tx
+          .insert(tattooSchema)
+          .values({
+            userId: customer.id,
+            ...input.tattoo,
+            imagePaths: input?.tattoo?.imagePaths || [],
+          })
+          .returning();
+        const [newBooking] = await tx
+          .insert(bookingSchema)
+          .values({
+            artistId: input.artistId,
+            userId: customer.id,
+            type: input.type as BookingType,
+            status: 'CONFIRMED',
+            tattooId: newTattoo.id,
+          })
+          .returning();
+        return newBooking;
+      });
+      return booking;
     },
   },
 };

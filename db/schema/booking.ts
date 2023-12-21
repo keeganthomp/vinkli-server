@@ -5,6 +5,7 @@ import {
   timestamp,
   pgEnum,
   boolean,
+  real,
 } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 import { users } from './user';
@@ -45,10 +46,11 @@ export const booking = pgTable('booking', {
   status: bookingStatusEnum('status').default('PENDING').notNull(),
   startDate: timestamp('start_date', {
     withTimezone: true,
-  }).notNull(),
+  }),
   endDate: timestamp('end_date', {
     withTimezone: true,
   }),
+  duration: real('duration'),
   completedAt: timestamp('completed_at', {
     withTimezone: true,
   }),
