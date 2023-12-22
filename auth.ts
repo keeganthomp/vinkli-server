@@ -6,6 +6,7 @@ import { ContextT } from 'types/context';
 import { GraphQLError } from 'graphql';
 import db from '@db/index';
 import { Request } from 'express';
+import { QueryResolvers } from 'types/graphql';
 
 //////////////////////////////////////////
 // DO NOT USE THIS IN ANY
@@ -24,6 +25,27 @@ const checkIfInstrospection = (req: Request) => {
   return isValidIntrospection;
 };
 
+type QueryResolverKeys = keyof QueryResolvers;
+
+// resolvers that do not require authentication
+// maybe a better way to do this? fine for now - there will not be too many
+const PUBLIC_RESOLVERS: QueryResolverKeys[] = [
+  'publicArtistProfile',
+  'customerCreateBooking',
+];
+
+const checkIfPublicRequest = (req: Request) => {
+  const operationName = req?.body?.operationName;
+  if (!operationName) return false;
+  const lowerCaseOperationName = operationName.toLowerCase();
+  const lowerCasePublicResolvers = PUBLIC_RESOLVERS.map((resolver) =>
+    resolver.toLowerCase(),
+  );
+  return lowerCasePublicResolvers.includes(
+    lowerCaseOperationName as QueryResolverKeys,
+  );
+};
+
 /**
  * Authenticate users
  * @returns user
@@ -38,6 +60,14 @@ const authenticate = async ({ req }: { req: Request }): Promise<ContextT> => {
       user: {
         userType: 'CUSTOMER',
       },
+    } as ContextT;
+  }
+
+  const isPublicRequest = checkIfPublicRequest(req);
+
+  if (isPublicRequest) {
+    return {
+      req,
     } as ContextT;
   }
 

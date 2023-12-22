@@ -13,6 +13,10 @@ import {
   getArtistProducts,
   getArtistPrices,
 } from 'utils/stripe';
+import db from '@db/index';
+import { booking as bookingSchema } from 'db/schema/booking';
+import { tattoo as tattooSchema } from 'db/schema/tattoo';
+import { users as usersShema } from 'db/schema/user';
 
 const resolvers: Resolvers = {
   Query: {
@@ -57,6 +61,16 @@ const resolvers: Resolvers = {
         hourlyRate,
         consultationFee,
       };
+    },
+    publicArtistProfile: async (_, { artistId }) => {
+      const artist = await db.query.users.findFirst({
+        where: (user, { eq, and }) =>
+          and(eq(user.id, artistId), eq(user.userType, 'ARTIST')),
+      });
+      if (!artist) {
+        throw new GraphQLError('Artist not found');
+      }
+      return artist;
     },
   },
   Mutation: {

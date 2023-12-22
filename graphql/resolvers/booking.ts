@@ -9,6 +9,7 @@ import { StorageBucket } from 'types/storage';
 import { desc, eq } from 'drizzle-orm';
 import { getBookingDuration, getAmountDue } from 'utils/booking';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from 'lib/supabase';
 
 type NewBooking = typeof bookingSchema.$inferInsert;
 
@@ -330,26 +331,73 @@ const resolvers: Resolvers = {
       if (!artistForBooking) {
         throw new GraphQLError('Artist not found');
       }
+      const formattedCustomerEmail = input.customerEmail.toLowerCase();
       // check for customer
       let customer = await db.query.users.findFirst({
         where: (user, { eq, and }) =>
           and(
-            eq(user.email, input.customerEmail.toLowerCase()),
+            eq(user.email, formattedCustomerEmail),
             eq(user.userType, 'CUSTOMER'),
           ),
       });
+      const isAnExistingCustomer = !!customer;
+      let isUserVerified = false;
+      let isInvited = false;
       // if no customer, create new customer
       const booking = await db.transaction(async (tx) => {
         if (!customer) {
-          [customer] = await tx
-            .insert(usersShema)
-            .values({
-              email: input.customerEmail.toLowerCase(),
-              userType: 'CUSTOMER',
-              name: input.customerEmail.replace(/@.*/, ''), // use email as initial name for now
-              id: uuidv4(), // need to figure out how to link to supabase auth user id....probably just add to supabse auth and have a trigger to add to users table
-            })
-            .returning();
+          const { data, error: errorCreatingCustomer } =
+            await supabase.auth.admin.createUser({
+              email: formattedCustomerEmail,
+              user_metadata: { name: input.name, user_type: 'CUSTOMER' },
+            });
+          if (errorCreatingCustomer) {
+            throw new GraphQLError('Error creating customer');
+          }
+          customer = {
+            id: data.user.id,
+            createdAt: new Date(data.user.created_at),
+            updatedAt: data.user.updated_at
+              ? new Date(data.user.updated_at)
+              : null,
+            email: data.user.email,
+            userType: data.user.user_metadata.user_type,
+            name: data.user.user_metadata.name,
+            phoneNumber: null,
+            stripeAccountId: null,
+            stripeCustomerId: null,
+            hasOnboardedToStripe: null,
+          } as typeof usersShema.$inferSelect;
+        }
+        // get user's auth status from supabase
+        const { data: supabaseUserData, error: errorFetchingSupabaseUser } =
+          await supabase.auth.admin.getUserById(customer.id);
+        console.log('supabaseUserData', supabaseUserData);
+        if (!errorFetchingSupabaseUser) {
+          // confirm user info
+          isUserVerified = !!supabaseUserData?.user?.confirmed_at; // if there is a confirmed_at date, user has confirmed email
+          const hasBeenInvited = !!supabaseUserData?.user?.confirmation_sent_at;
+          // if never been invited, send invite email
+          if (!hasBeenInvited) {
+            const { data: inviteResponseData, error: errorSendingInvite } =
+              await supabase.auth.admin.inviteUserByEmail(
+                formattedCustomerEmail,
+              );
+            if (errorSendingInvite) {
+              console.error(
+                'Error sending invite to new customer',
+                errorSendingInvite,
+              );
+            } else {
+              console.log('INVITEDD!!!');
+              isInvited = true;
+            }
+          }
+        } else {
+          console.error(
+            'Error fetching user from supabase',
+            errorFetchingSupabaseUser,
+          );
         }
         const [newTattoo] = await tx
           .insert(tattooSchema)
@@ -365,13 +413,24 @@ const resolvers: Resolvers = {
             artistId: input.artistId,
             userId: customer.id,
             type: input.type as BookingType,
-            status: 'CONFIRMED',
+            status: 'PENDING',
             tattooId: newTattoo.id,
           })
           .returning();
-        return newBooking;
+        return {
+          ...newBooking,
+          customer,
+          artist: artistForBooking,
+        };
       });
-      return booking;
+      return {
+        booking,
+        customerInfo: {
+          alreadyInvited: isAnExistingCustomer,
+          verified: isUserVerified,
+          isInvited,
+        },
+      };
     },
   },
 };

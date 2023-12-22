@@ -151,9 +151,16 @@ export type Charge = {
   paymentType?: Maybe<PaymentType>;
 };
 
+export type CustomerBookingResponse = {
+  __typename?: 'CustomerBookingResponse';
+  booking: Booking;
+  customerInfo: CustomerInfo;
+};
+
 export type CustomerCreateBookingInput = {
   artistId: Scalars['ID']['input'];
   customerEmail: Scalars['String']['input'];
+  name: Scalars['String']['input'];
   tattoo: TattooForBookingInput;
   title?: InputMaybe<Scalars['String']['input']>;
   type?: InputMaybe<BookingType>;
@@ -169,11 +176,18 @@ export type CustomerCreateTattooInput = {
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type CustomerInfo = {
+  __typename?: 'CustomerInfo';
+  alreadyInvited: Scalars['Boolean']['output'];
+  isInvited: Scalars['Boolean']['output'];
+  verified: Scalars['Boolean']['output'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   artistCreateBooking: Booking;
   artistUpdateBookingStatus: Booking;
-  customerCreateBooking: Booking;
+  customerCreateBooking: CustomerBookingResponse;
   customerCreateTattoo: Tattoo;
   deleteBooking?: Maybe<Booking>;
   generateStripeConnectOnboardingLink: Scalars['String']['output'];
@@ -278,6 +292,7 @@ export type Query = {
   customerTattoos: Array<Tattoo>;
   getPaymentLink: Scalars['String']['output'];
   getPayments: Array<Payment>;
+  publicArtistProfile: Artist;
   stripeTerminalConnectionToken: Scalars['String']['output'];
   user: User;
   users: Array<Maybe<User>>;
@@ -306,6 +321,11 @@ export type QueryCustomerBookingsArgs = {
 
 export type QueryGetPaymentLinkArgs = {
   bookingId: Scalars['ID']['input'];
+};
+
+
+export type QueryPublicArtistProfileArgs = {
+  artistId: Scalars['ID']['input'];
 };
 
 export type Refund = {
@@ -477,8 +497,10 @@ export type ResolversTypes = ResolversObject<{
   BookingType: BookingType;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Charge: ResolverTypeWrapper<Charge>;
+  CustomerBookingResponse: ResolverTypeWrapper<CustomerBookingResponse>;
   CustomerCreateBookingInput: CustomerCreateBookingInput;
   CustomerCreateTattooInput: CustomerCreateTattooInput;
+  CustomerInfo: ResolverTypeWrapper<CustomerInfo>;
   Date: ResolverTypeWrapper<Scalars['Date']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
@@ -517,8 +539,10 @@ export type ResolversParentTypes = ResolversObject<{
   Booking: Booking;
   Boolean: Scalars['Boolean']['output'];
   Charge: Charge;
+  CustomerBookingResponse: CustomerBookingResponse;
   CustomerCreateBookingInput: CustomerCreateBookingInput;
   CustomerCreateTattooInput: CustomerCreateTattooInput;
+  CustomerInfo: CustomerInfo;
   Date: Scalars['Date']['output'];
   Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
@@ -635,6 +659,19 @@ export type ChargeResolvers<ContextType = ContextT, ParentType extends Resolvers
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type CustomerBookingResponseResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['CustomerBookingResponse'] = ResolversParentTypes['CustomerBookingResponse']> = ResolversObject<{
+  booking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType>;
+  customerInfo?: Resolver<ResolversTypes['CustomerInfo'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type CustomerInfoResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['CustomerInfo'] = ResolversParentTypes['CustomerInfo']> = ResolversObject<{
+  alreadyInvited?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isInvited?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  verified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export interface DateScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Date'], any> {
   name: 'Date';
 }
@@ -646,7 +683,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type MutationResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   artistCreateBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<MutationArtistCreateBookingArgs, 'input'>>;
   artistUpdateBookingStatus?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<MutationArtistUpdateBookingStatusArgs, 'id' | 'status'>>;
-  customerCreateBooking?: Resolver<ResolversTypes['Booking'], ParentType, ContextType, RequireFields<MutationCustomerCreateBookingArgs, 'input'>>;
+  customerCreateBooking?: Resolver<ResolversTypes['CustomerBookingResponse'], ParentType, ContextType, RequireFields<MutationCustomerCreateBookingArgs, 'input'>>;
   customerCreateTattoo?: Resolver<ResolversTypes['Tattoo'], ParentType, ContextType, RequireFields<MutationCustomerCreateTattooArgs, 'input'>>;
   deleteBooking?: Resolver<Maybe<ResolversTypes['Booking']>, ParentType, ContextType, RequireFields<MutationDeleteBookingArgs, 'id'>>;
   generateStripeConnectOnboardingLink?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -685,6 +722,7 @@ export type QueryResolvers<ContextType = ContextT, ParentType extends ResolversP
   customerTattoos?: Resolver<Array<ResolversTypes['Tattoo']>, ParentType, ContextType>;
   getPaymentLink?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPaymentLinkArgs, 'bookingId'>>;
   getPayments?: Resolver<Array<ResolversTypes['Payment']>, ParentType, ContextType>;
+  publicArtistProfile?: Resolver<ResolversTypes['Artist'], ParentType, ContextType, RequireFields<QueryPublicArtistProfileArgs, 'artistId'>>;
   stripeTerminalConnectionToken?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   users?: Resolver<Array<Maybe<ResolversTypes['User']>>, ParentType, ContextType>;
@@ -743,6 +781,8 @@ export type Resolvers<ContextType = ContextT> = ResolversObject<{
   BalanceSourceTypes?: BalanceSourceTypesResolvers<ContextType>;
   Booking?: BookingResolvers<ContextType>;
   Charge?: ChargeResolvers<ContextType>;
+  CustomerBookingResponse?: CustomerBookingResponseResolvers<ContextType>;
+  CustomerInfo?: CustomerInfoResolvers<ContextType>;
   Date?: GraphQLScalarType;
   JSON?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;

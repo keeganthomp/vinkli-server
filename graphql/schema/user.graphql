@@ -61,6 +61,7 @@ type Query {
   user: User!
   artist: Artist!
   users: [User]!
+  publicArtistProfile(artistId: ID!): Artist!
 }
 # mutations
 type Mutation {

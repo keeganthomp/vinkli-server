@@ -6,7 +6,7 @@ type Query {
 }
 
 type Mutation {
-  customerCreateBooking(input: CustomerCreateBookingInput!): Booking!
+  customerCreateBooking(input: CustomerCreateBookingInput!): CustomerBookingResponse!
   artistCreateBooking(input: ArtistCreateBookingInput!): Booking!
   artistUpdateBookingStatus(
     id: ID!
@@ -14,6 +14,17 @@ type Mutation {
     duration: Int
   ): Booking!
   deleteBooking(id: ID!): Booking
+}
+
+type CustomerInfo {
+  verified: Boolean!
+  alreadyInvited: Boolean!
+  isInvited: Boolean!
+}
+
+type CustomerBookingResponse {
+  booking: Booking!
+  customerInfo: CustomerInfo!
 }
 
 type Booking {
@@ -54,6 +65,7 @@ input CustomerCreateBookingInput {
   artistId: ID!
   tattoo: TattooForBookingInput!
   customerEmail: String!
+  name: String!
   title: String
   type: BookingType
 }
