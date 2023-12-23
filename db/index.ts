@@ -8,7 +8,6 @@ import postgres from 'postgres';
 import * as userSchema from './schema/user';
 import * as bookingSchema from './schema/booking';
 import * as tattooSchema from './schema/tattoo';
-import * as stripeCustomerSchema from './schema/stripeCustomer';
 
 const connectionString = process.env.DATABASE_CONNECTION_STRING as string;
 
@@ -21,7 +20,6 @@ const schema = {
   ...userSchema,
   ...bookingSchema,
   ...tattooSchema,
-  ...stripeCustomerSchema,
 };
 
 // init drizzle

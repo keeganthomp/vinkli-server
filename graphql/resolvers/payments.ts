@@ -1,7 +1,7 @@
+import db from '@db/index';
 import { GraphQLError } from 'graphql';
 import { Resolvers, PaymentStatus, Booking } from 'types/graphql';
 import stripe from 'lib/stripe';
-import db from '@db/index';
 import { getArtistProducts } from 'utils/stripe';
 import { getBookingDuration } from 'utils/booking';
 import { StripeObjectMeta } from 'types/stripe';

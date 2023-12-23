@@ -17,9 +17,9 @@ type Mutation {
 }
 
 type CustomerInfo {
-  verified: Boolean!
-  alreadyInvited: Boolean!
-  isInvited: Boolean!
+  isNewCustomer: Boolean!
+  isConfirmed: Boolean!
+  inviteSent: Boolean!
 }
 
 type CustomerBookingResponse {

@@ -1,3 +1,4 @@
+import db from '@db/index';
 import { GraphQLError } from 'graphql';
 import { Resolvers } from 'types/graphql';
 import stripe from 'lib/stripe';
@@ -13,10 +14,6 @@ import {
   getArtistProducts,
   getArtistPrices,
 } from 'utils/stripe';
-import db from '@db/index';
-import { booking as bookingSchema } from 'db/schema/booking';
-import { tattoo as tattooSchema } from 'db/schema/tattoo';
-import { users as usersShema } from 'db/schema/user';
 
 const resolvers: Resolvers = {
   Query: {

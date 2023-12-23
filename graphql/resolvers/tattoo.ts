@@ -1,7 +1,7 @@
+import db from '@db/index';
+import { tattooSchema } from '@db/schema';
 import { GraphQLError } from 'graphql';
 import { Resolvers } from 'types/graphql';
-import db from '@db/index';
-import { tattoo as tattooSchema } from 'db/schema/tattoo';
 import { generateImageUrls } from 'utils/image';
 import { StorageBucket } from 'types/storage';
 import { asc, desc, eq } from 'drizzle-orm';

@@ -1,4 +1,4 @@
-import { User, Booking } from 'db/types';
+import { User, Booking } from 'types/db';
 import { getArtistPrices } from './stripe';
 
 export const getBookingDuration = (booking: Booking): number => {

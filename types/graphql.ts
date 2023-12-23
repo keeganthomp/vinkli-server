@@ -178,9 +178,9 @@ export type CustomerCreateTattooInput = {
 
 export type CustomerInfo = {
   __typename?: 'CustomerInfo';
-  alreadyInvited: Scalars['Boolean']['output'];
-  isInvited: Scalars['Boolean']['output'];
-  verified: Scalars['Boolean']['output'];
+  inviteSent: Scalars['Boolean']['output'];
+  isConfirmed: Scalars['Boolean']['output'];
+  isNewCustomer: Scalars['Boolean']['output'];
 };
 
 export type Mutation = {
@@ -666,9 +666,9 @@ export type CustomerBookingResponseResolvers<ContextType = ContextT, ParentType 
 }>;
 
 export type CustomerInfoResolvers<ContextType = ContextT, ParentType extends ResolversParentTypes['CustomerInfo'] = ResolversParentTypes['CustomerInfo']> = ResolversObject<{
-  alreadyInvited?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  isInvited?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  verified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  inviteSent?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isConfirmed?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isNewCustomer?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

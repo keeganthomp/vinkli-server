@@ -1,17 +1,15 @@
+import db from '@db/index';
+import schemas from '@db/schema';
 import { GraphQLError } from 'graphql';
 import { BookingType, Resolvers, BookingStatus } from 'types/graphql';
-import db from '@db/index';
-import { booking as bookingSchema } from 'db/schema/booking';
-import { tattoo as tattooSchema } from 'db/schema/tattoo';
-import { users as usersShema } from 'db/schema/user';
+import { User } from 'types/db';
 import { generateImageUrls } from 'utils/image';
 import { StorageBucket } from 'types/storage';
 import { desc, eq } from 'drizzle-orm';
 import { getBookingDuration, getAmountDue } from 'utils/booking';
-import { v4 as uuidv4 } from 'uuid';
 import { supabase } from 'lib/supabase';
 
-type NewBooking = typeof bookingSchema.$inferInsert;
+type NewBooking = typeof schemas.bookingSchema.$inferInsert;
 
 const allBookingStatuses: BookingStatus[] = [
   'PENDING',
@@ -98,7 +96,10 @@ const resolvers: Resolvers = {
             eq(booking.artistId, user.id),
             inArray(booking.status, statusFilter),
           ),
-        orderBy: [desc(bookingSchema.startDate), desc(bookingSchema.updatedAt)],
+        orderBy: [
+          desc(schemas.bookingSchema.startDate),
+          desc(schemas.bookingSchema.updatedAt),
+        ],
         with: {
           customer: true,
           artist: true,
@@ -126,7 +127,7 @@ const resolvers: Resolvers = {
         const bookings = await db.query.booking.findMany({
           where: (booking, { eq, and }) =>
             and(eq(booking.userId, user.id), eq(booking.status, status)),
-          orderBy: [desc(bookingSchema.createdAt)],
+          orderBy: [desc(schemas.bookingSchema.createdAt)],
           with: {
             customer: true,
             artist: true,
@@ -148,7 +149,7 @@ const resolvers: Resolvers = {
       }
       const bookings = await db.query.booking.findMany({
         where: (booking, { eq }) => eq(booking.userId, user.id),
-        orderBy: [desc(bookingSchema.createdAt)],
+        orderBy: [desc(schemas.bookingSchema.createdAt)],
         with: {
           customer: true,
           artist: true,
@@ -203,7 +204,7 @@ const resolvers: Resolvers = {
         }
         const newBooking = await db.transaction(async (tx) => {
           const [newBooking] = await tx
-            .insert(bookingSchema)
+            .insert(schemas.bookingSchema)
             .values({
               ...newBookingPayload,
               tattooId: input.tattooId as string,
@@ -228,7 +229,7 @@ const resolvers: Resolvers = {
       const newBooking = await db.transaction(async (tx) => {
         const newTattooPayload = newTattooInput || {};
         const [newTattoo] = await tx
-          .insert(tattooSchema)
+          .insert(schemas.tattooSchema)
           .values({
             ...newTattooPayload,
             userId: customer.id,
@@ -236,7 +237,7 @@ const resolvers: Resolvers = {
           })
           .returning();
         const [newBooking] = await tx
-          .insert(bookingSchema)
+          .insert(schemas.bookingSchema)
           .values({
             ...newBookingPayload,
             tattooId: newTattoo.id,
@@ -303,13 +304,13 @@ const resolvers: Resolvers = {
         endsAt = endDateObj;
       }
       const [updatedBooking] = await db
-        .update(bookingSchema)
+        .update(schemas.bookingSchema)
         .set({
           status: newStatus,
           endDate: endsAt,
           completedAt: isCompleted ? new Date() : null,
         })
-        .where(eq(bookingSchema.id, id))
+        .where(eq(schemas.bookingSchema.id, id))
         .returning();
       return {
         ...updatedBooking,
@@ -341,8 +342,8 @@ const resolvers: Resolvers = {
           ),
       });
       const isAnExistingCustomer = !!customer;
-      let isUserVerified = false;
-      let isInvited = false;
+      let isUserConfirmed = false;
+      let userInviteSent = false;
       // if no customer, create new customer
       const booking = await db.transaction(async (tx) => {
         if (!customer) {
@@ -352,6 +353,10 @@ const resolvers: Resolvers = {
               user_metadata: { name: input.name, user_type: 'CUSTOMER' },
             });
           if (errorCreatingCustomer) {
+            console.error(
+              'Error creating auth user in db',
+              errorCreatingCustomer,
+            );
             throw new GraphQLError('Error creating customer');
           }
           customer = {
@@ -363,22 +368,25 @@ const resolvers: Resolvers = {
             email: data.user.email,
             userType: data.user.user_metadata.user_type,
             name: data.user.user_metadata.name,
+            // to satisfy User type
+            // don't need this explicitely for anything for the customer type
             phoneNumber: null,
             stripeAccountId: null,
             stripeCustomerId: null,
             hasOnboardedToStripe: null,
-          } as typeof usersShema.$inferSelect;
+          } as User;
         }
         // get user's auth status from supabase
         const { data: supabaseUserData, error: errorFetchingSupabaseUser } =
           await supabase.auth.admin.getUserById(customer.id);
-        console.log('supabaseUserData', supabaseUserData);
+        console.log('supabase auth user info:', supabaseUserData);
         if (!errorFetchingSupabaseUser) {
           // confirm user info
-          isUserVerified = !!supabaseUserData?.user?.confirmed_at; // if there is a confirmed_at date, user has confirmed email
-          const hasBeenInvited = !!supabaseUserData?.user?.confirmation_sent_at;
+          isUserConfirmed = !!supabaseUserData?.user?.confirmed_at; // if there is a confirmed_at date, user has confirmed email
+          const userAlreadyInvited =
+            !!supabaseUserData?.user?.confirmation_sent_at;
           // if never been invited, send invite email
-          if (!hasBeenInvited) {
+          if (!userAlreadyInvited) {
             const { data: inviteResponseData, error: errorSendingInvite } =
               await supabase.auth.admin.inviteUserByEmail(
                 formattedCustomerEmail,
@@ -390,7 +398,7 @@ const resolvers: Resolvers = {
               );
             } else {
               console.log('INVITEDD!!!');
-              isInvited = true;
+              userInviteSent = true;
             }
           }
         } else {
@@ -400,7 +408,7 @@ const resolvers: Resolvers = {
           );
         }
         const [newTattoo] = await tx
-          .insert(tattooSchema)
+          .insert(schemas.tattooSchema)
           .values({
             userId: customer.id,
             ...input.tattoo,
@@ -408,7 +416,7 @@ const resolvers: Resolvers = {
           })
           .returning();
         const [newBooking] = await tx
-          .insert(bookingSchema)
+          .insert(schemas.bookingSchema)
           .values({
             artistId: input.artistId,
             userId: customer.id,
@@ -426,9 +434,9 @@ const resolvers: Resolvers = {
       return {
         booking,
         customerInfo: {
-          alreadyInvited: isAnExistingCustomer,
-          verified: isUserVerified,
-          isInvited,
+          isNewCustomer: !isAnExistingCustomer,
+          isConfirmed: isUserConfirmed,
+          inviteSent: userInviteSent,
         },
       };
     },
