@@ -50,7 +50,7 @@ const resolvers: Resolvers = {
     },
     userBookings: async (_, { status }, { user }) => {
       const bookingKey = user.userType === 'ARTIST' ? 'artistId' : 'userId';
-      console.log('status', status)
+      console.log('status', status);
       if (status) {
         const bookings = await db.query.booking.findMany({
           where: (booking, { eq, and }) =>
