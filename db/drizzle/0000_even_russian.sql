@@ -37,19 +37,13 @@ CREATE TABLE IF NOT EXISTS "booking" (
 	"tattoo_id" uuid NOT NULL,
 	"type" "bookingType" DEFAULT 'CONSULTATION' NOT NULL,
 	"status" "bookingStatus" DEFAULT 'PENDING' NOT NULL,
-	"title" text,
-	"description" text,
-	"start_date" timestamp with time zone NOT NULL,
-	"end_date" timestamp with time zone
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "stripe_customers" (
-	"id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
-	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"stripe_customer_id" text NOT NULL,
-	"artist_id" text NOT NULL,
-	"user_id" uuid NOT NULL
+	"start_date" timestamp with time zone,
+	"end_date" timestamp with time zone,
+	"duration" real,
+	"completed_at" timestamp with time zone,
+	"payment_intent_id" text,
+	"payment_link_id" text,
+	"payment_receive" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "tattoo" (
@@ -59,8 +53,9 @@ CREATE TABLE IF NOT EXISTS "tattoo" (
 	"user_id" uuid NOT NULL,
 	"title" text,
 	"description" text,
-	"tattoo_style" "tattooStyle",
-	"tattoo_color" "tattooColor",
+	"style" "tattooStyle",
+	"color" "tattooColor",
+	"placement" text,
 	"image_paths" text[] DEFAULT ARRAY[]::TEXT[] NOT NULL
 );
 --> statement-breakpoint
@@ -68,12 +63,15 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"created_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	"user_type" "user_type" DEFAULT 'CUSTOMER' NOT NULL,
-	"email" text NOT NULL,
-	"phone_number" integer,
-	"first_name" text NOT NULL,
-	"last_name" text NOT NULL,
+	"phone" text NOT NULL,
+	"user_type" "user_type",
+	"email" text,
+	"name" text,
 	"stripe_account_id" text,
 	"stripe_customer_id" text,
-	"has_onboarded_to_stripe" boolean
+	"has_onboarded_to_stripe" boolean DEFAULT false,
+	CONSTRAINT "users_phone_unique" UNIQUE("phone"),
+	CONSTRAINT "users_email_unique" UNIQUE("email"),
+	CONSTRAINT "users_stripe_account_id_unique" UNIQUE("stripe_account_id"),
+	CONSTRAINT "users_stripe_customer_id_unique" UNIQUE("stripe_customer_id")
 );

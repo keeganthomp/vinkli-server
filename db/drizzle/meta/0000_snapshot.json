@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "b4af937a-a6db-4723-a761-0e9f65ad9c2d",
+  "id": "69d2ff6f-4bee-4fda-b993-397791f6cbda",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "booking": {
@@ -61,78 +61,48 @@
           "notNull": true,
           "default": "'PENDING'"
         },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "start_date": {
           "name": "start_date",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "end_date": {
           "name": "end_date",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "stripe_customers": {
-      "name": "stripe_customers",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "uuid_generate_v4()"
         },
-        "created_at": {
-          "name": "created_at",
+        "duration": {
+          "name": "duration",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
+          "notNull": false
         },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "stripe_customer_id": {
-          "name": "stripe_customer_id",
+        "payment_intent_id": {
+          "name": "payment_intent_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "artist_id": {
-          "name": "artist_id",
+        "payment_link_id": {
+          "name": "payment_link_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
+        "payment_receive": {
+          "name": "payment_receive",
+          "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},
@@ -183,15 +153,21 @@
           "primaryKey": false,
           "notNull": false
         },
-        "tattoo_style": {
-          "name": "tattoo_style",
+        "style": {
+          "name": "style",
           "type": "tattooStyle",
           "primaryKey": false,
           "notNull": false
         },
-        "tattoo_color": {
-          "name": "tattoo_color",
+        "color": {
+          "name": "color",
           "type": "tattooColor",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "placement": {
+          "name": "placement",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -232,36 +208,29 @@
           "notNull": true,
           "default": "CURRENT_TIMESTAMP"
         },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "user_type": {
           "name": "user_type",
           "type": "user_type",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'CUSTOMER'"
+          "notNull": false
         },
         "email": {
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
-        },
-        "phone_number": {
-          "name": "phone_number",
-          "type": "integer",
-          "primaryKey": false,
           "notNull": false
         },
-        "first_name": {
-          "name": "first_name",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
-        },
-        "last_name": {
-          "name": "last_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "stripe_account_id": {
           "name": "stripe_account_id",
@@ -279,13 +248,43 @@
           "name": "has_onboarded_to_stripe",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": false
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "users_phone_unique": {
+          "name": "users_phone_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "phone"
+          ]
+        },
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        },
+        "users_stripe_account_id_unique": {
+          "name": "users_stripe_account_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_account_id"
+          ]
+        },
+        "users_stripe_customer_id_unique": {
+          "name": "users_stripe_customer_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "stripe_customer_id"
+          ]
+        }
+      }
     }
   },
   "enums": {
