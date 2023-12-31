@@ -32,6 +32,7 @@ type QueryResolverKeys = keyof QueryResolvers;
 const PUBLIC_RESOLVERS: QueryResolverKeys[] = [
   'publicArtistProfile',
   'customerCreateBooking',
+  'checkIfUserOnboarded',
 ];
 
 const checkIfPublicRequest = (req: Request) => {

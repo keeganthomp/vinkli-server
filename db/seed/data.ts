@@ -22,123 +22,56 @@ const UUIDS = [
   '746d84da-8ebd-47cb-b64f-1574bd0500e2',
 ];
 
-export const seedArtists: NewUser[] = [
+// To add new phones, these MUST match the predifned phones in the supabase config nder otp
+// add them there first then here
+const USER_PHONES = ['13346189523', '16153065113'];
+
+export const artists: Omit<NewUser, 'id'>[] = [
+  {
+    phone: USER_PHONES[0],
+    name: 'Keegan Thompson',
+    userType: 'ARTIST',
+    stripeAccountId: 'acct_1OTTW8RfNGQTv5cx',
+    hasOnboardedToStripe: true,
+  },
+];
+
+export const customers: Omit<NewUser, 'id'>[] = [
+  {
+    phone: USER_PHONES[1],
+    name: 'Julia Thompson',
+    userType: 'CUSTOMER',
+  },
+];
+
+export const tattoos: Omit<NewTattoo, 'userId'>[] = [
   {
     id: UUIDS[0],
-    email: 'artist1@gmail.com',
-    name: 'Timmy Joe',
-    userType: 'ARTIST',
-    hasOnboardedToStripe: false,
+    color: 'BLACK_AND_GREY',
+    style: 'BLACKWORK',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper con',
   },
   {
     id: UUIDS[1],
-    email: 'artist2@gmail.com',
-    name: 'Johnny Jim',
-    userType: 'ARTIST',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[2],
-    email: 'artist3@gmail.com',
-    name: 'Sarah Kin',
-    userType: 'ARTIST',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[3],
-    email: 'artist4@gmail.com',
-    name: 'Jane Street',
-    userType: 'ARTIST',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[4],
-    email: 'artist5@gmail.com',
-    name: 'Gee Lome',
-    userType: 'ARTIST',
-    hasOnboardedToStripe: false,
+    color: 'COLOR',
+    style: 'JAPANESE_IREZUMI',
+    description:
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper con',
   },
 ];
 
-export const seedCustomers: NewUser[] = [
-  {
-    id: UUIDS[5],
-    email: 'customer1@gmail.com',
-    name: 'Kai Lee',
-    userType: 'CUSTOMER',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[6],
-    email: 'customer2@gmail.com',
-    name: 'Paul Gree',
-    userType: 'CUSTOMER',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[7],
-    email: 'customer3@gmail.com',
-    name: 'Finn Woo',
-    userType: 'CUSTOMER',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[8],
-    email: 'customer4@gmail.com',
-    name: 'Laura Paul',
-    userType: 'CUSTOMER',
-    hasOnboardedToStripe: false,
-  },
-  {
-    id: UUIDS[9],
-    email: 'customer5@gmail.com',
-    name: 'Higy Tome',
-    userType: 'CUSTOMER',
-    hasOnboardedToStripe: false,
-  },
-];
-
-export const seedTattoos: NewTattoo[] = [];
-
-export const seedBookings: NewBooking[] = [
+export const bookings: Omit<NewBooking, 'userId' | 'artistId'>[] = [
   {
     id: UUIDS[1],
-    artistId: seedArtists[0].id,
-    userId: '1',
     startDate: new Date(),
     type: 'CONSULTATION',
-    tattooId: '1',
+    tattooId: tattoos[0].id as string,
   },
   {
     id: UUIDS[2],
-    artistId: seedArtists[0].id,
-    userId: '1',
     startDate: new Date(),
-    type: 'CONSULTATION',
-    tattooId: '1',
-  },
-  {
-    id: UUIDS[3],
-    artistId: seedArtists[0].id,
-    userId: '1',
-    startDate: new Date(),
-    type: 'CONSULTATION',
-    tattooId: '1',
-  },
-  {
-    id: UUIDS[4],
-    artistId: seedArtists[2].id,
-    userId: '1',
-    startDate: new Date(),
-    type: 'CONSULTATION',
-    tattooId: '1',
-  },
-  {
-    id: UUIDS[5],
-    artistId: seedArtists[3].id,
-    userId: '1',
-    startDate: new Date(),
-    type: 'CONSULTATION',
-    tattooId: '1',
+    type: 'TATTOO_SESSION',
+    tattooId: tattoos[0].id as string,
   },
 ];

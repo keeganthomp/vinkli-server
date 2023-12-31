@@ -11,7 +11,8 @@ type User {
   id: ID!
   createdAt: Date!
   updatedAt: Date!
-  email: String!
+  email: String
+  phone: String!
   name: String
   userType: UserType
   stripeAccountId: String
@@ -25,7 +26,8 @@ type Artist {
   id: ID!
   createdAt: Date!
   updatedAt: Date!
-  email: String!
+  email: String
+  phone: String!
   name: String
   stripeAccountId: String
   hasOnboardedToStripe: Boolean
@@ -56,15 +58,22 @@ type ArtistPaymentPayload {
   totalReceived: Int!
 }
 
+input OnboardUserInput {
+  name: String!
+  userType: UserType!
+}
+
 # queries
 type Query {
   user: User!
   artist: Artist!
   users: [User]!
+  checkIfUserOnboarded(phone: String!): Boolean!
   publicArtistProfile(artistId: ID!): Artist!
 }
 # mutations
 type Mutation {
   generateStripeConnectOnboardingLink: String!
   updateArtistRates(hourlyRate: Int, consultationFee: Int): Artist!
+  onboardUser(input: OnboardUserInput!): User!
 }

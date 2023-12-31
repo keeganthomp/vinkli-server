@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "NODE_ENV=development esno watch server.ts",
+    "dev": "NODE_ENV=development tsx watch server.ts --preserveWatchOutput",
     "build": "yarn drizzle:migrate && tsc --project tsconfig.json && tscpaths -p tsconfig.json -s . -o build",
     "start": "node --no-warnings --experimental-specifier-resolution=node ./build/server.js",
     "generate": "graphql-codegen --config codegen.ts",
@@ -23,6 +23,7 @@
     "drizzle:studio": "drizzle-kit studio",
     "supabase:local:start": "npx supabase start",
     "supabase:local:stop": "npx supabase stop",
+    "supabase:local:restart": "npx supabase stop && npx supabase start",
     "supabase:local:reset": "npx supabase reset"
   },
   "dependencies": {
@@ -60,7 +61,6 @@
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "esno": "^0.17.0",
     "nodemon": "^3.0.1",
     "open-cli": "^7.2.0",
     "prettier": "^3.0.3",

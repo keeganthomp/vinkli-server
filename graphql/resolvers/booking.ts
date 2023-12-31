@@ -1,7 +1,7 @@
 import db from '@db/index';
 import schemas from '@db/schema';
 import { GraphQLError } from 'graphql';
-import { BookingType, Resolvers, BookingStatus } from 'types/graphql';
+import { BookingType, Resolvers } from 'types/graphql';
 import { User } from 'types/db';
 import { generateImageUrls } from 'utils/image';
 import { StorageBucket } from 'types/storage';
@@ -11,45 +11,13 @@ import { supabase } from 'lib/supabase';
 
 type NewBooking = typeof schemas.bookingSchema.$inferInsert;
 
-const allBookingStatuses: BookingStatus[] = [
-  'PENDING',
-  'CONFIRMED',
-  'COMPLETED',
-  'CANCELLED',
-];
-
 const resolvers: Resolvers = {
   Query: {
-    customerBooking: async (_, { id: bookingId }, { user }) => {
+    userBooking: async (_, { id: bookingId }, { user }) => {
+      const bookingKey = user.userType === 'ARTIST' ? 'artistId' : 'userId';
       const booking = await db.query.booking.findFirst({
         where: (booking, { eq, and }) =>
-          and(eq(booking.id, bookingId), eq(booking.userId, user.id)),
-        with: {
-          customer: true,
-          artist: true,
-          tattoo: true,
-        },
-      });
-      if (!booking) {
-        throw new GraphQLError('Booking not found');
-      }
-      return {
-        ...booking,
-        duration: getBookingDuration(booking),
-        tattoo: {
-          ...booking.tattoo,
-          id: booking.tattooId,
-          imageUrls: generateImageUrls(
-            booking.tattoo.imagePaths,
-            StorageBucket.TATTOOS,
-          ),
-        },
-      };
-    },
-    artistBooking: async (_, { id: bookingId }, { user }) => {
-      const booking = await db.query.booking.findFirst({
-        where: (booking, { eq, and }) =>
-          and(eq(booking.id, bookingId), eq(booking.artistId, user.id)),
+          and(eq(booking.id, bookingId), eq(booking[bookingKey], user.id)),
         with: {
           customer: true,
           artist: true,
@@ -74,59 +42,19 @@ const resolvers: Resolvers = {
       if (booking.status !== 'COMPLETED') {
         return bookingPayload;
       }
-      const totalDue = await getAmountDue(user, booking);
+      const totalDue = await getAmountDue(booking.artist, booking);
       return {
         ...bookingPayload,
         totalDue,
       };
     },
-    artistBookings: async (_, { statuses = allBookingStatuses }, { user }) => {
-      if (user.userType !== 'ARTIST') {
-        throw new GraphQLError('User is not an artist', {
-          extensions: { code: 'FORBIDDEN' },
-        });
-      }
-      const statusFilter: BookingStatus[] =
-        !statuses || statuses.length === 0
-          ? allBookingStatuses
-          : (statuses as BookingStatus[]);
-      const bookings = await db.query.booking.findMany({
-        where: (booking, { eq, and, inArray }) =>
-          and(
-            eq(booking.artistId, user.id),
-            inArray(booking.status, statusFilter),
-          ),
-        orderBy: [
-          desc(schemas.bookingSchema.startDate),
-          desc(schemas.bookingSchema.updatedAt),
-        ],
-        with: {
-          customer: true,
-          artist: true,
-          tattoo: true,
-        },
-      });
-      return bookings.map((booking) => ({
-        ...booking,
-        duration: getBookingDuration(booking),
-        tattoo: {
-          ...booking.tattoo,
-          id: booking.tattooId,
-          imageUrls: generateImageUrls(
-            booking.tattoo.imagePaths,
-            StorageBucket.TATTOOS,
-          ),
-        },
-      }));
-    },
-    customerBookings: async (_, { status }, { user }) => {
-      if (user.userType !== 'CUSTOMER') {
-        throw new GraphQLError('User is not a customer');
-      }
+    userBookings: async (_, { status }, { user }) => {
+      const bookingKey = user.userType === 'ARTIST' ? 'artistId' : 'userId';
+      console.log('status', status)
       if (status) {
         const bookings = await db.query.booking.findMany({
           where: (booking, { eq, and }) =>
-            and(eq(booking.userId, user.id), eq(booking.status, status)),
+            and(eq(booking[bookingKey], user.id), eq(booking.status, status)),
           orderBy: [desc(schemas.bookingSchema.createdAt)],
           with: {
             customer: true,
@@ -148,7 +76,7 @@ const resolvers: Resolvers = {
         }));
       }
       const bookings = await db.query.booking.findMany({
-        where: (booking, { eq }) => eq(booking.userId, user.id),
+        where: (booking, { eq }) => eq(booking[bookingKey], user.id),
         orderBy: [desc(schemas.bookingSchema.createdAt)],
         with: {
           customer: true,
@@ -175,13 +103,10 @@ const resolvers: Resolvers = {
       if (currentUser.userType !== 'ARTIST') {
         throw new GraphQLError('User is not an artist');
       }
-      const { customerEmail, tattoo: newTattooInput } = input;
+      const { phone, tattoo: newTattooInput } = input;
       const customer = await db.query.users.findFirst({
         where: (user, { eq, and }) =>
-          and(
-            eq(user.email, customerEmail.toLowerCase()),
-            eq(user.userType, 'CUSTOMER'),
-          ),
+          and(eq(user.phone, phone), eq(user.userType, 'CUSTOMER')),
       });
       if (!customer) {
         throw new GraphQLError('Customer not found');
@@ -332,14 +257,10 @@ const resolvers: Resolvers = {
       if (!artistForBooking) {
         throw new GraphQLError('Artist not found');
       }
-      const formattedCustomerEmail = input.customerEmail.toLowerCase();
       // check for customer
       let customer = await db.query.users.findFirst({
         where: (user, { eq, and }) =>
-          and(
-            eq(user.email, formattedCustomerEmail),
-            eq(user.userType, 'CUSTOMER'),
-          ),
+          and(eq(user.phone, input.phone), eq(user.userType, 'CUSTOMER')),
       });
       const isAnExistingCustomer = !!customer;
       let isUserConfirmed = false;
@@ -349,7 +270,7 @@ const resolvers: Resolvers = {
         if (!customer) {
           const { data, error: errorCreatingCustomer } =
             await supabase.auth.admin.createUser({
-              email: formattedCustomerEmail,
+              phone: input.phone,
               user_metadata: { name: input.name, user_type: 'CUSTOMER' },
             });
           if (errorCreatingCustomer) {
@@ -366,6 +287,7 @@ const resolvers: Resolvers = {
               ? new Date(data.user.updated_at)
               : null,
             email: data.user.email,
+            phone: data.user.phone,
             userType: data.user.user_metadata.user_type,
             name: data.user.user_metadata.name,
             // to satisfy User type
@@ -388,9 +310,7 @@ const resolvers: Resolvers = {
           // if never been invited, send invite email
           if (!userAlreadyInvited) {
             const { data: inviteResponseData, error: errorSendingInvite } =
-              await supabase.auth.admin.inviteUserByEmail(
-                formattedCustomerEmail,
-              );
+              await supabase.auth.admin.inviteUserByEmail(input.phone);
             if (errorSendingInvite) {
               console.error(
                 'Error sending invite to new customer',

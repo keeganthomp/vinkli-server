@@ -1,6 +1,9 @@
 import db from '@db/index';
+import schemas from 'db/schema';
+import { eq } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
 import { Resolvers } from 'types/graphql';
+import { User } from 'types/db';
 import stripe from 'lib/stripe';
 import { StripeProduct } from 'types/stripe';
 import {
@@ -14,6 +17,8 @@ import {
   getArtistProducts,
   getArtistPrices,
 } from 'utils/stripe';
+
+const PHONE_REGEX = /^\d{1,3}\d{10}$/;
 
 const resolvers: Resolvers = {
   Query: {
@@ -69,8 +74,40 @@ const resolvers: Resolvers = {
       }
       return artist;
     },
+    checkIfUserOnboarded: async (_, { phone }) => {
+      const isValidPhone = PHONE_REGEX.test(phone);
+      if (!isValidPhone) {
+        throw new GraphQLError('Invalid phone number');
+      }
+      const user = await db.query.users.findFirst({
+        where: (user, { eq }) => eq(user.phone, phone),
+      });
+      if (!user) {
+        throw new GraphQLError('User does not exist');
+      }
+      const requiredFields: (keyof User)[] = ['name', 'userType'];
+      const missingFields = requiredFields.filter(
+        (field) => !user[field as keyof typeof user],
+      );
+      const hasOnboarded = missingFields.length === 0;
+      return hasOnboarded;
+    },
   },
   Mutation: {
+    onboardUser: async (_, { input }, { user }) => {
+      if (!user) {
+        throw new GraphQLError('User not authenticated');
+      }
+      const [updatedUser] = await db
+        .update(schemas.userSchema)
+        .set({
+          name: input.name,
+          userType: input.userType,
+        })
+        .where(eq(schemas.userSchema.id, user.id))
+        .returning();
+      return updatedUser;
+    },
     generateStripeConnectOnboardingLink: async (_, __, { user }) => {
       if (!user) {
         throw new GraphQLError('User not authenticated');

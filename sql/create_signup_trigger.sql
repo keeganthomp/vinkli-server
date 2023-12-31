@@ -23,8 +23,8 @@ create function public.handle_new_user()
 returns trigger as $$
 begin
   -- Insert into public.users
-  insert into public.users (id, email, name)
-  values (new.id, new.raw_user_meta_data->>'email', new.raw_user_meta_data->>'name');
+  insert into public.users (id, phone)
+  values (new.id, new.phone);
 
   return new;
 end;

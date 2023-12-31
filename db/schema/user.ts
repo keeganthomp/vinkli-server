@@ -24,10 +24,10 @@ export const users = pgTable('users', {
   })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  userType: userTypeEnum('user_type').default('CUSTOMER').notNull(),
-  email: text('email').notNull().unique(),
-  name: text('name').notNull(),
-  phoneNumber: integer('phone_number').unique(),
+  phone: text('phone').notNull().unique(),
+  userType: userTypeEnum('user_type'),
+  email: text('email').unique(),
+  name: text('name'),
   stripeAccountId: text('stripe_account_id').unique(),
   stripeCustomerId: text('stripe_customer_id').unique(),
   hasOnboardedToStripe: boolean('has_onboarded_to_stripe').default(false),
