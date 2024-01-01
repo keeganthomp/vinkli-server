@@ -1,13 +1,13 @@
 import db from '@db/index';
 import schemas from '@db/schema';
 import { GraphQLError } from 'graphql';
-import { BookingType, Resolvers } from 'types/graphql';
-import { User } from 'types/db';
-import { generateImageUrls } from 'utils/image';
-import { StorageBucket } from 'types/storage';
+import { BookingType, Resolvers } from '@type/graphql';
+import { User } from '@type/db';
+import { generateImageUrls } from '@utils/image';
+import { StorageBucket } from '@type/storage';
 import { desc, eq } from 'drizzle-orm';
-import { getBookingDuration, getAmountDue } from 'utils/booking';
-import { supabase } from 'lib/supabase';
+import { getBookingDuration, getAmountDue } from '@utils/booking';
+import { supabase } from '@lib/supabase';
 
 type NewBooking = typeof schemas.bookingSchema.$inferInsert;
 

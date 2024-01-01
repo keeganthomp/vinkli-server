@@ -3,7 +3,7 @@ const router = Router();
 
 import db from '@db/index';
 import { userSchema } from '@db/schema';
-import stripe from 'lib/stripe';
+import stripe from '@lib/stripe';
 import { eq } from 'drizzle-orm';
 import bp from 'body-parser';
 

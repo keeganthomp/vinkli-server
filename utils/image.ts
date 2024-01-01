@@ -1,4 +1,4 @@
-import { StorageBucket } from 'types/storage';
+import { StorageBucket } from '@type/storage';
 
 const { DATABASE_URL } = process.env;
 const BASE_STORAGE_PATH = 'storage/v1/object/public';

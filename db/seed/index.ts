@@ -1,9 +1,9 @@
 import db from '..';
 
-import schemas from 'db/schema';
+import schemas from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { artists, customers, tattoos, bookings } from './data';
-import { supabase } from 'lib/supabase';
+import { supabase } from '@lib/supabase';
 
 const seedAuthUsers = async () => {
   console.log('seeding auth table...');

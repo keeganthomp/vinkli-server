@@ -1,6 +1,6 @@
-import { User } from 'types/db';
-import { StripeProduct } from 'types/stripe';
-import stripe from 'lib/stripe';
+import { User } from '@type/db';
+import { StripeProduct } from '@type/stripe';
+import stripe from '@lib/stripe';
 
 export const MAX_STRIPE_PRODUCT_PRICE = 99999999; // in cents as stripe only accepts cents
 export const DEFAULT_CURRENCY = 'usd';

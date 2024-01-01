@@ -2,11 +2,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { authenticateUser } from '@lib/supabase';
-import { ContextT } from 'types/context';
+import { ContextT } from '@type/context';
 import { GraphQLError } from 'graphql';
 import db from '@db/index';
 import { Request } from 'express';
-import { QueryResolvers } from 'types/graphql';
+import { QueryResolvers } from '@type/graphql';
 
 //////////////////////////////////////////
 // DO NOT USE THIS IN ANY

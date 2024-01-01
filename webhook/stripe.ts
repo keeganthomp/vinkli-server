@@ -1,12 +1,12 @@
 import express, { Router } from 'express';
 const router = Router();
 
-import stripe from 'lib/stripe';
+import stripe from '@lib/stripe';
 import db from '@db/index';
-import { users as userSchema } from 'db/schema/user';
-import { booking as bookingSchema } from 'db/schema/booking';
+import { users as userSchema } from '@db/schema/user';
+import { booking as bookingSchema } from '@db/schema/booking';
 import { eq } from 'drizzle-orm';
-import { StripeObjectMeta } from 'types/stripe';
+import { StripeObjectMeta } from '@type/stripe';
 
 const { STRIPE_WEBHOOK_SECRET } = process.env;
 

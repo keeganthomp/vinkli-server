@@ -1,4 +1,4 @@
-import stripe from 'lib/stripe';
+import stripe from '@lib/stripe';
 
 const { data: connectedAccounts } = await stripe.accounts.list({
   limit: 100,

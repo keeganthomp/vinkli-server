@@ -14,7 +14,7 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled';
-import { ContextT } from 'types/context';
+import { ContextT } from '@type/context';
 import { ApolloServerErrorCode } from '@apollo/server/errors';
 import scalars from '@graphql/scalars';
 import logger from './logger';

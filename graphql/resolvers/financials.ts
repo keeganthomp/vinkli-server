@@ -5,8 +5,8 @@ import {
   SourceType,
   PayoutStatus,
   RefundStatus,
-} from 'types/graphql';
-import stripe from 'lib/stripe';
+} from '@type/graphql';
+import stripe from '@lib/stripe';
 
 const resolvers: Resolvers = {
   Query: {

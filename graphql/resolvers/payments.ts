@@ -1,10 +1,10 @@
 import db from '@db/index';
 import { GraphQLError } from 'graphql';
-import { Resolvers, PaymentStatus, Booking } from 'types/graphql';
-import stripe from 'lib/stripe';
-import { getArtistProducts } from 'utils/stripe';
-import { getBookingDuration } from 'utils/booking';
-import { StripeObjectMeta } from 'types/stripe';
+import { Resolvers, PaymentStatus, Booking } from '@type/graphql';
+import stripe from '@lib/stripe';
+import { getArtistProducts } from '@utils/stripe';
+import { getBookingDuration } from '@utils/booking';
+import { StripeObjectMeta } from '@type/stripe';
 
 const stripeStatusMap: Record<string, PaymentStatus> = {
   succeeded: 'SUCCESS',

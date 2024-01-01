@@ -1,11 +1,11 @@
 import db from '@db/index';
-import schemas from 'db/schema';
+import schemas from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { GraphQLError } from 'graphql';
-import { Resolvers } from 'types/graphql';
-import { User } from 'types/db';
-import stripe from 'lib/stripe';
-import { StripeProduct } from 'types/stripe';
+import { Resolvers } from '@type/graphql';
+import { User } from '@type/db';
+import stripe from '@lib/stripe';
+import { StripeProduct } from '@type/stripe';
 import {
   MAX_STRIPE_PRODUCT_PRICE,
   getPriceInCents,
@@ -16,7 +16,7 @@ import {
   deactivateProductPrice,
   getArtistProducts,
   getArtistPrices,
-} from 'utils/stripe';
+} from '@utils/stripe';
 
 const PHONE_REGEX = /^\d{1,3}\d{10}$/;
 

@@ -1,9 +1,9 @@
 import db from '@db/index';
 import { tattooSchema } from '@db/schema';
 import { GraphQLError } from 'graphql';
-import { Resolvers } from 'types/graphql';
-import { generateImageUrls } from 'utils/image';
-import { StorageBucket } from 'types/storage';
+import { Resolvers } from '@type/graphql';
+import { generateImageUrls } from '@utils/image';
+import { StorageBucket } from '@type/storage';
 import { asc, desc, eq } from 'drizzle-orm';
 
 const resolvers: Resolvers = {
