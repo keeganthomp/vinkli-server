@@ -50,6 +50,10 @@ const resolvers: Resolvers = {
       const validPayemnts = payments.filter((payment) =>
         metaDataKeys.every((key) => payment.metadata[key]),
       );
+      const hasValidPayments = validPayemnts.length > 0;
+      if (!hasValidPayments) {
+        return [];
+      }
       // get bookings from database
       const bookingIds = validPayemnts.map(
         (payment) => payment.metadata.bookingId,
@@ -60,6 +64,7 @@ const resolvers: Resolvers = {
           customer: true,
         },
       });
+
       // return payment with booking
       const paymentsWithBookings = validPayemnts.map((payment) => {
         const booking = bookings.find(

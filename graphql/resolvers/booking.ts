@@ -104,12 +104,35 @@ const resolvers: Resolvers = {
         throw new GraphQLError('User is not an artist');
       }
       const { phone, tattoo: newTattooInput } = input;
-      const customer = await db.query.users.findFirst({
+      let customer = await db.query.users.findFirst({
         where: (user, { eq, and }) =>
           and(eq(user.phone, phone), eq(user.userType, 'CUSTOMER')),
       });
       if (!customer) {
-        throw new GraphQLError('Customer not found');
+        const { data, error: errorCreatingNewCustomer } =
+          await supabase.auth.admin.createUser({
+            phone,
+          });
+        if (errorCreatingNewCustomer) {
+          throw new GraphQLError('Error creating new customer');
+        }
+        customer = {
+          id: data.user.id,
+          createdAt: new Date(data.user.created_at),
+          updatedAt: data.user.updated_at
+            ? new Date(data.user.updated_at)
+            : null,
+          email: data.user.email,
+          phone: data.user.phone,
+          userType: data.user.user_metadata.user_type,
+          name: data.user.user_metadata.name,
+          // to satisfy User type
+          // don't need this explicitely for anything for the customer type
+          phoneNumber: null,
+          stripeAccountId: null,
+          stripeCustomerId: null,
+          hasOnboardedToStripe: null,
+        } as User;
       }
       const newBookingPayload: Omit<NewBooking, 'tattooId'> = {
         artistId: currentUser.id,
@@ -157,7 +180,7 @@ const resolvers: Resolvers = {
           .insert(schemas.tattooSchema)
           .values({
             ...newTattooPayload,
-            userId: customer.id,
+            userId: customer?.id as string,
             imagePaths: newTattooPayload?.imagePaths || [],
           })
           .returning();
