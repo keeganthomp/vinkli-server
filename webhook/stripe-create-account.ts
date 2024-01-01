@@ -6,7 +6,7 @@ import { userSchema } from '@db/schema';
 import stripe from '@lib/stripe';
 import { eq } from 'drizzle-orm';
 import bp from 'body-parser';
-import { checkValidSupabaseWebhook } from 'utils/webhook';
+import { checkValidSupabaseWebhook } from '@utils/webhook';
 import { Database } from 'types/supabase';
 
 type UserFromDb = Database['public']['Tables']['users']['Row'];
