@@ -14,10 +14,10 @@ type RawDbUser = {
   id: string;
   created_at: string;
   updated_at: string;
-  email: string;
+  email: string | null;
   name: string;
   user_type: 'ARTIST' | 'CUSTOMER';
-  phone_number: string | null;
+  phone: string;
   stripe_account_id: string | null;
   stripe_customer_id: string | null;
 };
@@ -32,6 +32,7 @@ router.post('/stripe-create-account', bp.json(), async (req, res) => {
       user_type,
       name,
       email,
+      phone,
       stripe_account_id,
       stripe_customer_id,
     } = user;
@@ -62,7 +63,6 @@ router.post('/stripe-create-account', bp.json(), async (req, res) => {
         const account = await stripe.accounts.create({
           type: CONNECT_ACCOUNT_TYPE,
           default_currency: 'usd',
-          email,
           business_type: 'individual',
           individual,
           metadata: {
@@ -91,7 +91,7 @@ router.post('/stripe-create-account', bp.json(), async (req, res) => {
           first_name && last_name ? `${first_name} ${last_name}` : undefined;
         // create stripe customer
         const customer = await stripe.customers.create({
-          email,
+          phone,
           name,
           metadata: {
             user_id,
