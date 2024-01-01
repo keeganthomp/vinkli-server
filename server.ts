@@ -32,7 +32,7 @@ const getFileExtension = () => (isProduction ? '.js' : '.ts');
 // webhooks directory
 const webhooksDir = path.join(__dirname, 'webhook');
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 const app = express();
 const webhookRouter = express.Router();
 
