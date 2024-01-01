@@ -6,25 +6,16 @@ import { userSchema } from '@db/schema';
 import stripe from '@lib/stripe';
 import { eq } from 'drizzle-orm';
 import bp from 'body-parser';
+import { checkValidSupabaseWebhook } from 'utils/webhook';
+import { Database } from 'types/supabase';
 
-// this will be the raw data from the postgres db (public.users table)
-// columns will be snake_case - the User exported from drizzle is camelCase
-// easiier to make custom type here
-type RawDbUser = {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  email: string | null;
-  name: string;
-  user_type: 'ARTIST' | 'CUSTOMER';
-  phone: string;
-  stripe_account_id: string | null;
-  stripe_customer_id: string | null;
-};
+type UserFromDb = Database['public']['Tables']['users']['Row'];
 
 router.post('/stripe-create-account', bp.json(), async (req, res) => {
   try {
-    const user = req?.body?.record as RawDbUser;
+    const isValidWebhook = checkValidSupabaseWebhook(req);
+    if (!isValidWebhook) return res.status(400).send('Invalid webhook call');
+    const user = req?.body?.record as UserFromDb;
     if (!user) return res.status(400).send('No body found');
     if (!user.id) return res.status(400).send('No user id provided in record');
     const {
@@ -36,8 +27,8 @@ router.post('/stripe-create-account', bp.json(), async (req, res) => {
       stripe_account_id,
       stripe_customer_id,
     } = user;
-    const first_name = name.split(' ')[0];
-    const last_name = name.split(' ')[1];
+    const first_name = name?.split(' ')[0];
+    const last_name = name?.split(' ')[1];
     switch (user_type) {
       case 'ARTIST': {
         // check if user already has stripe account
@@ -49,9 +40,12 @@ router.post('/stripe-create-account', bp.json(), async (req, res) => {
         // express, standard, custom -- see stripe docs
         const CONNECT_ACCOUNT_TYPE = 'express';
         // build meta data object
-        const individual = {} as {
+        const individual = {
+          phone,
+        } as {
           first_name?: string;
           last_name?: string;
+          phone: string;
         };
         if (first_name) {
           individual['first_name'] = first_name;
@@ -68,6 +62,7 @@ router.post('/stripe-create-account', bp.json(), async (req, res) => {
           metadata: {
             user_id,
             user_type,
+            phone,
           },
         });
         // update user with stripe account id

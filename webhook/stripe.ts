@@ -14,6 +14,10 @@ router.post(
   '/stripe',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
+    console.log('WEEEE HEREE');
+    console.log('WEEEE HEREE');
+    console.log('WEEEE HEREE');
+    console.log('WEEEE HEREE');
     if (!STRIPE_WEBHOOK_SECRET) {
       return res.status(400).send('Missing stripe webhook secret');
     }

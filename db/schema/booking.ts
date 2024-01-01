@@ -39,9 +39,15 @@ export const booking = pgTable('booking', {
   })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  artistId: uuid('artist_id').notNull(),
-  userId: uuid('user_id').notNull(),
-  tattooId: uuid('tattoo_id').notNull(),
+  artistId: uuid('artist_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  tattooId: uuid('tattoo_id')
+    .notNull()
+    .references(() => tattoo.id, { onDelete: 'cascade' }),
   type: bookingTypeEnum('type').default('CONSULTATION').notNull(),
   status: bookingStatusEnum('status').default('PENDING').notNull(),
   startDate: timestamp('start_date', {

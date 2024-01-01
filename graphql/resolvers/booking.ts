@@ -116,23 +116,21 @@ const resolvers: Resolvers = {
         if (errorCreatingNewCustomer) {
           throw new GraphQLError('Error creating new customer');
         }
-        customer = {
-          id: data.user.id,
-          createdAt: new Date(data.user.created_at),
-          updatedAt: data.user.updated_at
-            ? new Date(data.user.updated_at)
-            : null,
-          email: data.user.email,
-          phone: data.user.phone,
-          userType: data.user.user_metadata.user_type,
-          name: data.user.user_metadata.name,
-          // to satisfy User type
-          // don't need this explicitely for anything for the customer type
-          phoneNumber: null,
-          stripeAccountId: null,
-          stripeCustomerId: null,
-          hasOnboardedToStripe: null,
-        } as User;
+        // update public user as it will have been created from the hook on auth table
+        [customer] = await db
+          .update(schemas.userSchema)
+          .set({
+            name: input.customerName,
+            userType: 'CUSTOMER',
+          })
+          .where(eq(schemas.userSchema.id, data.user.id))
+          .returning();
+      }
+      if (customer && !customer?.name && input?.customerName) {
+        await db
+          .update(schemas.userSchema)
+          .set({ name: input.customerName })
+          .where(eq(schemas.userSchema.id, customer.id));
       }
       const newBookingPayload: Omit<NewBooking, 'tattooId'> = {
         artistId: currentUser.id,

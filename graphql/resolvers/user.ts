@@ -32,6 +32,22 @@ const resolvers: Resolvers = {
       // check if user/artist has onboarded via stripe connect
       return user;
     },
+    existingCustomer: async (_, { phone }, { user }) => {
+      if (!user) {
+        throw new GraphQLError('User not authenticated');
+      }
+      if (user.userType !== 'ARTIST') {
+        throw new GraphQLError('Not Allowed');
+      }
+      const customer = await db.query.users.findFirst({
+        where: (user, { eq, and, like }) =>
+          and(
+            like(user.phone, '%' + phone + '%'),
+            eq(user.userType, 'CUSTOMER'),
+          ),
+      });
+      return customer || null;
+    },
     artist: async (_, __, { user }) => {
       if (!user) {
         throw new GraphQLError('User not authenticated');

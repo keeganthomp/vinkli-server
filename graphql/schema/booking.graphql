@@ -80,6 +80,7 @@ input TattooForBookingInput {
 
 input ArtistCreateBookingInput {
   phone: String!
+  customerName: String
   startDate: Date!
   endDate: Date
   tattooId: ID

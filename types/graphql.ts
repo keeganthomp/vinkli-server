@@ -34,6 +34,7 @@ export type Artist = {
 };
 
 export type ArtistCreateBookingInput = {
+  customerName?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['Date']['input']>;
   phone: Scalars['String']['input'];
   startDate: Scalars['Date']['input'];
@@ -299,6 +300,7 @@ export type Query = {
   artistFinancials: ArtistFinancials;
   checkIfUserOnboarded: Scalars['Boolean']['output'];
   customerTattoos: Array<Tattoo>;
+  existingCustomer?: Maybe<User>;
   getPaymentLink: Scalars['String']['output'];
   getPayments: Array<Payment>;
   publicArtistProfile: Artist;
@@ -311,6 +313,11 @@ export type Query = {
 
 
 export type QueryCheckIfUserOnboardedArgs = {
+  phone: Scalars['String']['input'];
+};
+
+
+export type QueryExistingCustomerArgs = {
   phone: Scalars['String']['input'];
 };
 
@@ -728,6 +735,7 @@ export type QueryResolvers<ContextType = ContextT, ParentType extends ResolversP
   artistFinancials?: Resolver<ResolversTypes['ArtistFinancials'], ParentType, ContextType>;
   checkIfUserOnboarded?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<QueryCheckIfUserOnboardedArgs, 'phone'>>;
   customerTattoos?: Resolver<Array<ResolversTypes['Tattoo']>, ParentType, ContextType>;
+  existingCustomer?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryExistingCustomerArgs, 'phone'>>;
   getPaymentLink?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<QueryGetPaymentLinkArgs, 'bookingId'>>;
   getPayments?: Resolver<Array<ResolversTypes['Payment']>, ParentType, ContextType>;
   publicArtistProfile?: Resolver<ResolversTypes['Artist'], ParentType, ContextType, RequireFields<QueryPublicArtistProfileArgs, 'artistId'>>;

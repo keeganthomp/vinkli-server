@@ -42,7 +42,9 @@ export const tattoo = pgTable('tattoo', {
   })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  userId: uuid('user_id').notNull(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   title: text('title'),
   description: text('description'),
   style: tattooStyleEnum('style'),
