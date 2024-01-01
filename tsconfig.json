@@ -9,7 +9,7 @@
       "@lib/*": ["./lib/*"],
       "@graphql/*": ["./graphql/*"],
       "@db/*": ["./db/*"],
-      "@auth": ["./auth"],
+      "@auth": ["./auth"]
     },
     "target": "ES2017",
     "module": "ES2022",
