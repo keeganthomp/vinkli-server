@@ -20,6 +20,8 @@ import {
 
 const PHONE_REGEX = /^\d{1,3}\d{10}$/;
 
+const { STRIPE_CONNECT_REDIRECT_URI, STRIPE_CONNECT_REAUTH_URI } = process.env;
+
 const resolvers: Resolvers = {
   Query: {
     user: async (_, __, { user }) => {
@@ -138,8 +140,8 @@ const resolvers: Resolvers = {
       const accountLink = await stripe.accountLinks.create({
         account: user.stripeAccountId,
         type: 'account_onboarding',
-        refresh_url: 'https://example.com/reauth',
-        return_url: 'https://example.com/return',
+        refresh_url: STRIPE_CONNECT_REAUTH_URI,
+        return_url: STRIPE_CONNECT_REDIRECT_URI,
       });
       // send onboarding link to client
       return accountLink.url;
